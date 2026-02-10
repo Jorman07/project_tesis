@@ -1,0 +1,167 @@
+{% extends 'layout.html' %}
+{% block title %}Reportes - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reportes.css') }}">
+
+<div class="card reportes-page">
+
+  <div class="users-head">
+    <div>
+      <h2 class="users-title">Reportes</h2>
+      <p class="users-subtitle">Selecciona tipo de reporte y periodo. Se incluyen alertas del periodo.</p>
+    </div>
+  </div>
+
+  <div class="reportes-controls">
+    <select id="rTipo" class="uf-input">
+      <option value="ANUAL">ANUAL</option>
+      <option value="MENSUAL">MENSUAL</option>
+      <option value="DIARIO">DIARIO</option>
+    </select>
+
+    <input id="rFechaAnual" class="uf-input" placeholder="YYYY (ej: 2025)">
+    <input id="rFechaMensual" class="uf-input hidden" type="month">
+    <input id="rFechaDiario" class="uf-input hidden" type="date">
+
+    <button id="btnRun" class="btn-back" type="button">Generar</button>
+    <button id="btnClear" class="btn-back btn-ghost" type="button">Limpiar</button>
+    <button id="btnPdf" class="btn-back hidden" type="button">Descargar PDF</button>
+  </div>
+
+  <p id="msgRep" class="form-msg"></p>
+
+  <div id="repOut" class="detail-card rep-shell hidden">
+
+    <div class="detail-head rep-shell-head">
+      <div>
+        <h4 class="detail-title">Resumen general</h4>
+        <p class="rep-meta" id="repMeta"></p>
+      </div>
+    </div>
+
+    <div class="rep-kpis" id="repResumen"></div>
+
+    <div class="rep-inner-grid">
+
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title" id="tSerie">Serie</h4>
+        </div>
+
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <colgroup>
+              <col class="rep-col-text">
+              <col class="rep-col-num">
+            </colgroup>
+            <thead>
+              <tr id="serieHead"></tr>
+            </thead>
+            <tbody id="serieBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- NUEVO: CAPTACIÓN (por mes o por día según tipo) -->
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title" id="tCapt">Captación (Temprana / Tardía)</h4>
+        </div>
+
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <colgroup>
+              <col class="rep-col-text">
+              <col class="rep-col-num">
+              <col class="rep-col-num">
+            </colgroup>
+            <thead>
+              <tr id="captHead"></tr>
+            </thead>
+            <tbody id="captBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title">Dosis por vacuna</h4>
+        </div>
+
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <colgroup>
+              <col class="rep-col-text">
+              <col class="rep-col-num">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Vacuna</th>
+                <th class="rep-right">Dosis</th>
+              </tr>
+            </thead>
+            <tbody id="dosisBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title">Personas por vacuna</h4>
+        </div>
+
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <colgroup>
+              <col class="rep-col-text">
+              <col class="rep-col-num">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Vacuna</th>
+                <th class="rep-right">Personas</th>
+              </tr>
+            </thead>
+            <tbody id="persBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title">Alertas del periodo</h4>
+        </div>
+
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <colgroup>
+              <col class="rep-col-text">
+              <col style="width:110px">
+              <col class="rep-col-num">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th class="rep-right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="alertBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/reportes.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<p>{{ data.footer }}</p>
+<p>{{ data.autor }}</p>
+{% endblock %}

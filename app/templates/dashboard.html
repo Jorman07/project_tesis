@@ -1,0 +1,306 @@
+{% extends 'layout.html' %}
+{% block title %}Dashboard - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+<div class="card dashboard-page">
+
+  <div class="dash-head">
+    <div>
+      <h2 class="dash-title">Dashboard – Inmunización e Inventario</h2>
+      <p class="dash-subtitle">Modo PowerBI: clic en un gráfico para filtrar.</p>
+    </div>
+
+    <button id="btnReset" class="btn-mini">Resetear filtros</button>
+  </div>
+
+  <div class="dash-filters">
+    <div class="filter-item">
+      <label class="filter-label">Periodo</label>
+      <select id="selPeriodo" class="uf-input"></select>
+    </div>
+
+    <div class="filter-item">
+      <label class="filter-label">Vacuna</label>
+      <select id="selVacuna" class="uf-input">
+        <option value="">Todas</option>
+      </select>
+    </div>
+
+    <div class="filter-item">
+      <label class="filter-label">Esquema</label>
+      <select id="selEsquema" class="uf-input">
+        <option value="">Todos</option>
+        <option value="ESQUEMA CAMPAÑA">Campaña</option>
+        <option value="ESQUEMA CAPTACIÓN TEMPRANA">Captación temprana</option>
+        <option value="ESQUEMA CAPTACIÓN TARDÍA">Captación tardía</option>
+      </select>
+    </div>
+  </div>
+
+  <p id="msgDash" class="form-msg"></p>
+
+  <!-- KPIs -->
+  <div class="dash-kpis">
+    <div class="kpi-card">
+      <div class="kpi-label">Dosis Totales en el mes</div>
+      <div id="kpiDosisMes" class="kpi-value">—</div>
+      <div id="kpiDosisMesSub" class="kpi-sub">—</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">% Captación temprana</div>
+      <div id="kpiTemprana" class="kpi-value">—</div>
+      <div class="kpi-sub">VS tardía</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Alertas</div>
+      <div id="kpiAlertas" class="kpi-value">—</div>
+      <div class="kpi-sub">Estado = PENDIENTE</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Registros válidos</div>
+      <div id="kpiValidos" class="kpi-value">—</div>
+      <div id="kpiValidosSub" class="kpi-sub">—</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Frascos de Biológicos por vencer</div>
+      <div id="kpiBioVence" class="kpi-value">—</div>
+      <div class="kpi-sub">≤ 60 días</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Predicción Personas - Próximo mes</div>
+      <div id="kpiPred" class="kpi-value">—</div>
+      <div id="kpiPredSub" class="kpi-sub">—</div>
+    </div>
+  </div>
+
+  <!-- =========================
+       FILA 1 (2 columnas apiladas)
+       Izq: Tendencia + Calidad
+       Der: Dosis por día + Top vacunas
+  ========================== -->
+  <div class="dash-grid2 dash-row1">
+
+    <div class="dash-stack dash-row1-stack">
+      <div class="card dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Tendencia mensual</h3>
+          <p class="dash-card-sub">Últimos meses. Filtra por mes</p>
+        </div>
+        <div id="pltMensual" class="plot plot-tall"></div>
+      </div>
+
+      <div class="card dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Estado de Registros del periodo</h3>
+        </div>
+        <div id="pltCalidad" class="plot"></div>
+      </div>
+    </div>
+
+    <div class="dash-stack dash-row1-stack">
+      <div class="card dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Dosis totales por día del periodo</h3>
+        </div>
+        <div id="pltDiario" class="plot"></div>
+      </div>
+
+      <div class="card dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Top Vacunas durante el periodo</h3>
+          <p class="dash-card-sub">Filtra por Vacuna / Biológico.</p>
+        </div>
+        <div id="pltVacunas" class="plot plot-tall"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =========================
+       FILA 2 (2 columnas grandes)
+       Jeringas por tipo | Insumos estimados
+  ========================== -->
+  <div class="dash-grid2 dash-row2">
+
+    <div class="card dash-card dash-card-big">
+      <div class="dash-card-head">
+        <h3 class="dash-card-title">Cantidad de Jeringas por tipo usados</h3>
+        <p class="dash-card-sub">Distribución según vacunas del periodo</p>
+      </div>
+      <div id="pltJeringasPie" class="plot"></div>
+    </div>
+
+    <div class="card dash-card dash-card-big">
+      <div class="dash-card-head">
+        <h3 class="dash-card-title">Insumos usados diarios</h3>
+        <p class="dash-card-sub">Jeringas por dosis, guantes por personas. Alcohol y algodón estimados.</p>
+      </div>
+
+      <div class="dash-mini-kpis">
+        <div class="mini-kpi">
+          <div class="mini-kpi-label">Alcohol (ml)</div>
+          <div id="kpiAlcoholMlIn" class="mini-kpi-value">—</div>
+          <div id="kpiAlcoholSubIn" class="mini-kpi-sub">—</div>
+        </div>
+
+        <div class="mini-kpi">
+          <div class="mini-kpi-label">Algodón (rollos)</div>
+          <div id="kpiAlgodonRollosIn" class="mini-kpi-value">—</div>
+          <div id="kpiAlgodonSubIn" class="mini-kpi-sub">—</div>
+        </div>
+      </div>
+
+      <div id="pltInsumosEstimados" class="plot"></div>
+    </div>
+
+  </div>
+
+  <!-- =========================
+       FILA 3 (2 columnas)
+       FEFO | Brechas territoriales
+  ========================== -->
+  <div class="dash-grid2 dash-row3">
+
+    <div class="card dash-card">
+      <div class="dash-card-head">
+        <h3 class="dash-card-title">Inventario FEFO - Lotes de Biológicos por vencer</h3>
+      </div>
+      <div id="pltCaducidad" class="plot"></div>
+    </div>
+
+    <div class="card dash-card">
+      <div class="dash-card-head">
+        <h3 class="dash-card-title">Brechas territoriales</h3>
+        <p class="dash-card-sub">Vulnerabilidad de parroquias sin atender</p>
+      </div>
+      <div id="pltParroquia" class="plot"></div>
+    </div>
+
+  </div>
+
+  <!-- =========================
+       FILA 4 (Predicciones)
+       Izq: Personas + Top Bio (apiladas)
+       Der: Proyección insumos (próx mes)
+  ========================== -->
+  <div class="dash-grid2 dash-row4">
+
+    <div class="dash-stack">
+      <div class="card dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Predicción Cantidad de Personas a vacunar el próximo mes</h3>
+          <p class="dash-card-sub">Basado en el historial de meses previos al periodo</p>
+        </div>
+        <div id="pltPredPeople" class="plot"></div>
+      </div>
+
+      <div class="card dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Predicción Top Biológicos para el próximo mes</h3>
+          <p class="dash-card-sub">Basado en el historial de consumo de meses previos al periodo</p>
+        </div>
+        <div id="pltPredBioTop" class="plot"></div>
+      </div>
+    </div>
+
+    <div class="card dash-card">
+      <div class="dash-card-head" style="margin-top:10px;">
+        <h3 class="dash-card-title" style="font-size:14px;">Proyección insumos estimados a utilizar el próximo mes</h3>
+        <p class="dash-card-sub">Escenario futuro basado en el consumo de meses previos a la fecha</p>
+      </div>
+
+      <div id="pltInsumosFcJeringas" class="plot"></div>
+      <div id="pltInsumosFcGuantes" class="plot"></div>
+    </div>
+
+  </div>
+
+  <!-- =========================
+     ACCIONES / RECOMENDACIONES (NUEVO)
+========================== -->
+  <div class="dash-grid2">
+
+    <div class="card dash-card">
+      <div class="dash-card-head">
+        <h3 class="dash-card-title">Acciones estratégicas de inventario</h3>
+        <p class="dash-card-sub">Riesgo de quiebre y sobre-stock según consumo proyectado</p>
+      </div>
+
+      <div class="dash-mini-kpis">
+        <div class="mini-kpi">
+          <div class="mini-kpi-label">Biológicos riesgo alto</div>
+          <div id="kpiBioRiesgoAlto" class="mini-kpi-value">—</div>
+          <div id="kpiBioRiesgoAltoSub" class="mini-kpi-sub">—</div>
+        </div>
+
+        <div class="mini-kpi">
+          <div class="mini-kpi-label">Insumos riesgo alto</div>
+          <div id="kpiInsRiesgoAlto" class="mini-kpi-value">—</div>
+          <div id="kpiInsRiesgoAltoSub" class="mini-kpi-sub">—</div>
+        </div>
+      </div>
+
+      <div class="rec-table-wrap">
+        <table class="rec-table">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Ítem</th>
+              <th>Riesgo de quiebre</th>
+              <th>Riesgo de sobre-stock</th>
+              <th>Pedido sugerido</th>
+            </tr>
+          </thead>
+          <tbody id="tblRecomendaciones">
+            <tr>
+              <td colspan="5" class="rec-muted">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Opcional: si quieres un segundo panel, lo dejamos vacío por ahora -->
+    <div id="lotDetail" class="card dash-card lot-detail is-empty">
+      <div class="lot-empty">
+        <div class="lot-empty-title">Sin selección</div>
+        <div class="lot-empty-sub">Haz clic en un ítem de la tabla para ver lotes y riesgos FEFO.</div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <!-- =========================
+     MAPA DE RIESGOS (FULL WIDTH)
+========================== -->
+  <div class="dash-grid-full">
+    <div class="card dash-card dash-card-wide">
+      <div class="dash-card-head">
+        <h3 class="dash-card-title">Mapa de riesgos (Top ítems)</h3>
+        <p class="dash-card-sub">Comparación de riesgo de quiebre vs vencimiento (0–1) usando stock real + forecast.</p>
+      </div>
+      <div id="pltRiskRadar" class="plot plot-radar"></div>
+    </div>
+  </div>
+
+</div>
+
+
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<p>{{ data.footer }}</p>
+<p>{{ data.autor }}</p>
+{% endblock %}

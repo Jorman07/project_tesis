@@ -1,0 +1,259 @@
+version: "3.1"
+
+intents:
+  - saludo
+  - contar_vacuna_mes
+  - ayuda
+  - reporte_mensual
+  - paciente_historial
+  - paciente_dato
+  - contar_vacuna_dia
+  - pregunta_incompleta
+  - top_vacuna_periodo
+  - paciente_info_personal
+  - paciente_dato_multiple
+  - despedida
+  - bot_info
+  - out_of_scope
+  - datos_personales
+  - conteo_captacion_periodo
+  - conteo_total_dia
+  - top_mes_anio
+  - insumo_categorias
+  - insumo_stock_tipo
+  - insumo_lotes_tipo
+  - insumo_por_caducar
+  - insumo_biologicos_asociados
+  - biologico_detalle
+  - pacientes_proxima_dosis_hoy
+  - vacunacion_query
+  - nlu_fallback
+
+
+  
+
+entities:
+  - periodo
+  - cedula
+  - vacuna
+  - fecha
+  - campo_paciente
+  - captacion
+  - anio
+  - insumo_categoria
+  - insumo_tipo
+  - biologico
+  - campo_biologico
+  - unidad
+  - exp_days
+  
+
+slots:
+  periodo:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: periodo
+  cedula:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: cedula
+  
+  campo_paciente:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: campo_paciente
+
+  vacuna:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: vacuna
+  fecha:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: fecha
+  
+  captacion:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: captacion
+
+  anio:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: anio
+
+  insumo_categoria:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: insumo_categoria
+
+  insumo_tipo:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: insumo_tipo
+
+  biologico:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: biologico
+
+  campo_biologico:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: campo_biologico
+
+  unidad:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: unidad
+
+  exp_days:
+    type: float
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: exp_days
+        
+  last_cedula:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  last_biologico:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  last_insumo_categoria:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  last_insumo_tipo:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  last_vacuna:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  last_periodo:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+responses:
+  utter_saludo:
+    - text: "Hola 👋 ¿Qué deseas consultar? Puedo ayudarte con reportes, conteos y datos de pacientes."
+
+  utter_despedida:
+    - text: "Listo ✅ Si necesitas otro reporte o consulta, aquí estoy."
+
+  utter_bot_info:
+    - text: |
+        Soy un asistente para consultas de inmunización.
+        Puedo:
+        • Generar reportes por periodo
+        • Contar dosis por vacuna y fecha
+        • Consultar historial y datos puntuales de un paciente (con cédula)
+
+  utter_out_of_scope:
+    - text: "Puedo ayudarte con reportes, conteos y pacientes. Si me dices el periodo, vacuna, fecha o cédula, lo resolvemos."
+
+  utter_datos_personales:
+    - text: |
+        Puedo consultar información registrada en el sistema para fines de inmunización.
+
+  utter_ayuda:
+    - text: |
+        Puedo ayudarte con:
+        • “reporte 2025-12” o “resumen diciembre 2025”
+        • “historial 0967******”
+        • “parroquia del paciente 0967******” / “próxima dosis del paciente 0967******”
+        • “cuántos se vacunaron con Influenza el 2025-12-10”
+  utter_pedir_periodo:
+    - text: |
+        Me falta el **periodo**.
+        Ejemplos:
+        • “SRP en septiembre 2025”
+        • “Influenza en 2025-09”
+  
+  utter_insumo_pedir_categoria:
+    - text: "¿De qué **categoría**? Ej: JERINGAS, GUANTES, ALGODON, ALCOHOL."
+
+  utter_insumo_pedir_tipo:
+    - text: "¿Qué **tipo** exactamente? Ej: “23G x 1\" 0.5ml” o “Precargada”."
+
+  utter_biologico_pedir_campo:
+    - text: "¿Qué dato del biológico necesitas? Puedo: **vía, ángulo, dosis por frasco, dosis administrada, descripción**."
+
+  utter_ack_v1:
+    - text: "Listo."
+  utter_ack_v2:
+    - text: "Hecho."
+  utter_ack_v3:
+    - text: "De acuerdo."
+
+  utter_more_v1:
+    - text: "¿Quieres que muestre más resultados o que lo filtre por biológico?"
+  utter_more_v2:
+    - text: "¿Deseas ver más registros o filtrar por biológico?"
+  utter_more_v3:
+    - text: "¿Te muestro más pacientes o prefieres filtrar por biológico?"
+
+actions:
+  - action_reporte_mensual
+  - action_paciente_historial
+  - action_paciente_dato
+  - action_contar_vacuna_dia
+  - action_contar_vacuna_mes
+  - action_datos_personales
+  - action_default_fallback
+  - action_ayuda_contextual
+  - action_info_general
+  - action_top_vacuna_periodo
+  - action_paciente_info_personal
+  - action_paciente_dato_multiple
+  - action_conteo_captacion_periodo
+  - action_conteo_total_dia
+  - action_top_mes_anio
+  - action_insumo_categorias
+  - action_insumo_stock_tipo
+  - action_insumo_lotes_tipo
+  - action_insumo_por_caducar
+  - action_insumo_biologicos_asociados
+  - action_biologico_detalle
+  - action_pacientes_proxima_dosis_hoy
+  - action_try_vacunacion_query

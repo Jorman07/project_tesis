@@ -1,0 +1,37 @@
+version: "3.1"
+language: es
+
+pipeline:
+- name: WhitespaceTokenizer
+
+- name: RegexFeaturizer
+  use_lookup_tables: true
+  use_regexes: true
+
+- name: CountVectorsFeaturizer
+- name: CountVectorsFeaturizer
+  analyzer: char_wb
+  min_ngram: 3
+  max_ngram: 5
+
+
+- name: RegexEntityExtractor
+  use_lookup_tables: true
+  use_regexes: true
+
+- name: DIETClassifier
+  epochs: 80
+  constrain_similarities: true
+
+- name: EntitySynonymMapper
+
+- name: FallbackClassifier
+  threshold: 0.55
+  ambiguity_threshold: 0.10
+
+policies:
+- name: RulePolicy
+  core_fallback_threshold: 0.35
+  core_fallback_action_name: action_default_fallback
+  enable_fallback_prediction: true
+assistant_id: 20260205-225652-patient-urn

@@ -1,0 +1,154 @@
+{% extends 'layout.html' %}
+{% block title %}Archivos - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/archivos.css') }}">
+
+<div class="card archivos-page">
+
+  <!-- HEADER -->
+  <div class="archivos-head">
+    <div>
+      <h2 class="archivos-title">Archivos</h2>
+      <p class="archivos-sub">Carga y gestión de archivos PRASS. (Solo Administrador)</p>
+    </div>
+  </div>
+
+  <!-- CARGA PRINCIPAL (igual al modal) -->
+  <div class="archivos-toolbar">
+    <input id="fileInput" type="file" accept=".html,.htm,.xls,.xlsx" hidden />
+
+    <label for="fileInput" class="btn-back" id="fileLabel">Elegir archivo </label>
+
+    <span id="fileName" class="file-name">Ningún archivo seleccionado</span>
+
+    <button id="btnPreview" class="btn-back">Previsualizar</button>
+    <button id="btnGuardar" class="btn-back hidden">+ Cargar Archivo</button>
+  </div>
+
+  <p id="msg" class="form-msg"></p>
+
+  <!-- PREVIEW -->
+  <div id="previewCard" class="detail-card hidden">
+    <div class="detail-head">
+      <h3 class="detail-title">Previsualización</h3>
+      <div class="detail-summary" id="meta"></div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr id="prevHead"></tr>
+        </thead>
+        <tbody id="prevBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FILTROS TABLA -->
+  <div class="archivos-filters">
+    <input id="fNombreArchivo" class="uf-input" placeholder="Buscar por archivo...">
+    <input id="fUsuario" class="uf-input" placeholder="Buscar por usuario...">
+
+    <select id="fMes" class="uf-input">
+      <option value="">Mes: Todos</option>
+    </select>
+
+    <select id="fEstado" class="uf-input">
+      <option value="">Estado: Todos</option>
+      <option value="PENDIENTE">PENDIENTE</option>
+      <option value="PROCESADO">PROCESADO</option>
+      <option value="GUARDADO">GUARDADO</option>
+      <option value="ERROR">ERROR</option>
+    </select>
+
+    <button id="btnClear" class="btn-mini">Limpiar</button>
+  </div>
+
+  <!-- TABLA ARCHIVOS -->
+  <div class="table-wrap">
+    <table class="table" id="archTable">
+      <thead>
+        <tr>
+          <th>Archivo</th>
+          <th>Usuario</th>
+          <th>Fecha carga</th>
+          <th class="right">Filas</th>
+          <th>Min Vac</th>
+          <th>Max Vac</th>
+          <th>Meses</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="archBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: ACTUALIZAR DOCUMENTO (mismo estilo que carga principal) -->
+<div id="modalUpdate" class="modal hidden">
+  <div class="modal__backdrop" id="modalUpdateBackdrop"></div>
+
+  <div class="modal__card">
+    <div class="modal__top">
+      <div>
+        <h3 class="modal__title">Actualizar documento</h3>
+        <p class="modal__meta" id="updMeta"></p>
+      </div>
+      <button id="modalUpdateClose" class="modal__close" type="button">Cerrar</button>
+    </div>
+
+    <div class="modal__section">
+      <div class="archivos-toolbar">
+        <input id="fileUpdate" type="file" accept=".html,.htm,.xls,.xlsx" hidden />
+
+        <label for="fileUpdate" class="btn-back" id="fileUpdateLabel">
+          Elegir archivo
+        </label>
+
+        <span id="fileUpdateName" class="file-name">Ningún archivo seleccionado</span>
+
+
+        <button id="btnPreviewUpdate" class="btn-back">Previsualizar</button>
+        <button id="btnApplyUpdate" class="btn-back">Aplicar actualización</button>
+      </div>
+
+      <p id="updMsg" class="form-msg"></p>
+
+      <div id="updSummary" class="detail-card hidden">
+        <div class="detail-head">
+          <h4 class="detail-title">Nuevo archivo detectado</h4>
+          <div class="detail-summary" id="updStats"></div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Archivo</th>
+                <th class="right">Filas</th>
+                <th>Min Vac</th>
+                <th>Max Vac</th>
+                <th>Meses</th>
+              </tr>
+            </thead>
+            <tbody id="updRows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="hint">
+        Al aplicar: el archivo queda en estado <b>PENDIENTE</b>. Luego debes presionar <b>Procesar</b>.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/archivos.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<p>{{ data.footer }}</p>
+<p>{{ data.autor }}</p>
+{% endblock %}

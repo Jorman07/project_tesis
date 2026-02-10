@@ -1,0 +1,410 @@
+/* =========================
+   BIOLOGICOS - estilos base
+   (mismo look que Insumos/Usuarios)
+   ========================= */
+
+.biologicos-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.biologicos-title{ margin:0; font-size:20px; }
+.biologicos-sub{ margin:6px 0 0; color:var(--muted); font-size:13px; }
+
+.biologicos-head-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.hidden{ display:none !important; }
+
+/* Inputs y selects */
+.input{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  outline: none;
+  min-width: 200px;
+}
+
+.input:focus{
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.12);
+}
+
+.input option{
+  background:#0f172a;
+  color:#e5e7eb;
+}
+
+/* toolbar */
+.types-toolbar{
+  margin-top:16px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+/* grid de biológicos */
+.bio-grid{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap:14px;
+}
+
+.bio-card{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255,255,255,0.03);
+  padding:14px;
+  cursor:pointer;
+  transition: all .15s ease;
+}
+
+.bio-card:hover{
+  border-color:var(--brand);
+  background:rgba(34,197,94,0.06);
+  transform: translateY(-1px);
+}
+
+.bio-card.active{
+  border-color:var(--brand);
+  background:rgba(34,197,94,0.10);
+}
+
+.bio-name{
+  margin:0 0 10px;
+  font-size:15px;
+  font-weight:800;
+}
+
+.bio-kpis{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.kpi{
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  color:var(--text);
+  background:rgba(255,255,255,0.02);
+}
+.kpi b{ color:var(--brand); }
+
+/* detalle */
+#detailSection{ margin-top:16px; }
+
+.detail-card{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255,255,255,0.03);
+  padding:14px;
+}
+
+.detail-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.detail-title{ margin:0; font-size:16px; }
+
+.detail-summary{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:13px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.section-title{
+  margin:16px 0 10px;
+  font-size:14px;
+  color:var(--text);
+}
+
+/* tabla */
+.table-wrap{
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+
+/* scrollbar discreto */
+.table-wrap::-webkit-scrollbar{ height:6px; width:6px; }
+.table-wrap::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.08); border-radius:10px; }
+.table-wrap::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.14); }
+.table-wrap::-webkit-scrollbar-track{ background: transparent; }
+.table-wrap{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) transparent; }
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1000px;
+}
+
+.table th{
+  text-align:left;
+  padding:10px;
+  background:rgba(255,255,255,0.04);
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+  white-space:nowrap;
+}
+
+.table td{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+  white-space:nowrap;
+}
+
+.right{ text-align:right; }
+
+/* pills */
+.pill-ok{ color:#22c55e; }
+.pill-bad{ color:#ef4444; }
+
+/* lista de insumos/jeringas asociadas */
+.vac-list{
+  margin:10px 0 0;
+  padding-left:18px;
+}
+.vac-list li{
+  margin-bottom:6px;
+  color:var(--muted);
+}
+.vac-list b{ color:var(--text); }
+
+/* botones */
+.btn-back{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:600;
+}
+.btn-back:hover{
+  border-color: var(--brand);
+  background: rgba(34,197,94,0.08);
+}
+
+.btn-mini{
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+  cursor:pointer;
+}
+.btn-mini:hover{
+  border-color:var(--brand);
+  background:rgba(34,197,94,0.08);
+}
+.btn-mini.danger{
+  border-color: rgba(239,68,68,.5);
+  background: rgba(239,68,68,.15);
+}
+.btn-mini.danger:hover{
+  background: rgba(239,68,68,.25);
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* =========================
+   MODAL (igual estilo Insumos)
+   ========================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal__backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.55);
+}
+
+.modal__card{
+  position:relative;
+  width:min(900px, 95vw);
+  background: var(--panel2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+}
+
+.modal__top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.modal__title{ margin:0; font-size:18px; }
+.modal__meta{ margin:6px 0 0; color: var(--muted); font-size:13px; }
+
+.modal__close{
+  cursor:pointer;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:10px;
+  padding:6px 10px;
+}
+
+.modal__section{ margin-top:14px; }
+
+.form-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap:12px;
+}
+
+.field label{
+  display:block;
+  color: var(--muted);
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.hint{
+  display:block;
+  margin-top:6px;
+  color: var(--muted);
+  font-size:12px;
+}
+
+.modal__actions{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+
+.modal{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal__backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.65);
+}
+
+.modal__card{
+  position: relative;
+  z-index: 2;
+
+  width: min(760px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+
+  margin: 0;   /* 🔥 clave: que no empuje hacia abajo */
+}
+/* ==============================
+   SCROLL DISCRETO (MODAL)
+   ============================== */
+.modal__card{
+  scrollbar-width: thin;                         /* Firefox */
+  scrollbar-color: rgba(255,255,255,.20) transparent;
+}
+
+/* Chrome / Edge / Safari */
+.modal__card::-webkit-scrollbar{
+  width: 8px;
+}
+
+.modal__card::-webkit-scrollbar-track{
+  background: transparent;
+}
+
+.modal__card::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.18);
+  border-radius: 999px;
+  border: 2px solid transparent;                 /* hace el thumb más fino visualmente */
+  background-clip: content-box;
+}
+
+.modal__card::-webkit-scrollbar-thumb:hover{
+  background: rgba(255,255,255,.28);
+  background-clip: content-box;
+}
+
+
+/* chips para jeringas seleccionadas */
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:8px;
+}
+
+.chip{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  color:var(--text);
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.chip button{
+  border:none;
+  background:transparent;
+  color: var(--danger);
+  cursor:pointer;
+  font-weight:800;
+}
+
+/* responsive */
+@media (max-width: 900px){
+  .form-grid{ grid-template-columns: 1fr; }
+  .table{ min-width: 900px; }
+}
+
+
+.row-focus {
+  outline: 2px solid #f59e0b;
+  background: #fff7ed;
+}

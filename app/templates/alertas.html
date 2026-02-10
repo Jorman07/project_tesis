@@ -1,0 +1,84 @@
+{% extends 'layout.html' %}
+{% block title %}Alertas - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/alertas.css') }}">
+
+<div class="alerts-page" data-user-role="{{ user_role }}">
+
+  <div class="alerts-head">
+    <div>
+      <h2 class="alerts-title">Alertas</h2>
+      <p class="alerts-subtitle">Se muestran únicamente alertas pendientes.</p>
+    </div>
+
+    <div class="alerts-tools">
+      <select id="fEntidad" class="uf-input alerts-filter">
+        <option value="">TODOS</option>
+        <option value="REGISTRO">REGISTRO</option>
+        <option value="BIOLOGICO">BIOLOGICO</option>
+        <option value="INSUMO">INSUMO</option>
+      </select>
+
+      <button id="btnReload" class="btn-back btn-ghost" type="button">Actualizar</button>
+    </div>
+  </div>
+
+  <div class="alerts-card">
+    <div class="alerts-table-wrap">
+      <table class="alerts-table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Detalle</th>
+            <th>Entidad</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+
+            {% if user_role != "ASISTENTE" %}
+              <th class="right">Acción</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody id="alertasBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay hidden" id="modalAccion" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <div class="modal-head">
+      <h3 id="modalTitulo" class="modal-title">Acción</h3>
+      <button class="icon-btn" type="button" id="btnCloseModal" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="modal-label" for="accionDetalle">Observación</label>
+      <textarea id="accionDetalle" class="modal-textarea"
+        placeholder="Escriba una observación (opcional)"
+        rows="4"></textarea>
+
+      <p class="modal-hint">
+        Si no escribes nada, se guardará: <span class="hint-strong">“REVISÉ Y CONFIRMÉ QUE NO ES UN PROBLEMA”</span>.
+      </p>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-back btn-ghost" type="button" id="btnCancelModal">Cancelar</button>
+      <button class="btn-back btn-primary" type="button" id="btnConfirmModal">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.USER_ROLE = "{{ user_role }}";
+</script>
+<script src="{{ url_for('static', filename='js/alertas.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+  <p>{{ data.footer }}</p>
+  <p>{{ data.autor }}</p>
+{% endblock %}

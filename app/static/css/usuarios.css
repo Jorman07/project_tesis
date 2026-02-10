@@ -1,0 +1,280 @@
+/* =========================
+   FILTROS + CABECERA
+   ========================= */
+
+.users-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom: 6px;
+}
+
+.users-title{
+  margin:0;
+  font-size:20px;
+}
+
+.users-subtitle{
+  margin:6px 0 0;
+  color: var(--muted);
+  font-size:13px;
+}
+
+/* filtros */
+.users-filters{
+  margin-top:14px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center; /* alinea botón e inputs */
+}
+
+/* Botón crear (para colocarlo primero en filtros) */
+.btn-create{
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+  text-decoration:none;
+  font-weight:600;
+  white-space:nowrap;
+  display:inline-block;
+}
+.btn-create:hover{
+  border-color:var(--brand);
+  background:rgba(34,197,94,0.08);
+}
+
+.uf-input{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+  min-width:220px;
+}
+
+.uf-input option{
+  background:#0f172a;
+  color:#e5e7eb;
+}
+
+
+/* =========================
+   TABLA
+   ========================= */
+
+.table-wrap{
+  margin-top:16px;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+
+/* Scrollbar discreto para tabla (Chrome/Edge) */
+.table-wrap::-webkit-scrollbar{
+  height:6px;
+  width:6px;
+}
+.table-wrap::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,0.08);
+  border-radius:10px;
+}
+.table-wrap::-webkit-scrollbar-thumb:hover{
+  background: rgba(255,255,255,0.14);
+}
+.table-wrap::-webkit-scrollbar-track{
+  background: transparent;
+}
+
+/* Firefox */
+.table-wrap{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.18) transparent;
+}
+
+.ut{
+  width:100%;
+  border-collapse:collapse;
+  min-width:980px;
+}
+
+.ut th{
+  padding:10px;
+  text-align:left;
+  background: rgba(255,255,255,0.04);
+  border-bottom:1px solid var(--border);
+}
+
+.ut td{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+}
+
+/* =========================
+   BOTONES / ACCIONES
+   ========================= */
+
+.btn-mini{
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-block;
+  line-height: 1;
+}
+.btn-mini:hover{
+  border-color:var(--brand);
+  background:rgba(34,197,94,0.08);
+}
+
+.btn-mini.danger{
+  border-color: rgba(239,68,68,.5);
+  background: rgba(239,68,68,.15);
+}
+.btn-mini.danger:hover{
+  background: rgba(239,68,68,.25);
+}
+
+.btn-mini.is-disabled{
+  opacity:0.55;
+  cursor:not-allowed;
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.form-inline{ margin:0; }
+
+.empty-row{
+  padding:14px;
+  color: var(--muted);
+  text-align:center;
+}
+
+/* =========================
+   MODAL
+   ========================= */
+
+.hidden{display:none !important;}
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal__backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.55);
+}
+
+.modal__card{
+  position:relative;
+  width:min(520px, 92vw);
+  background: var(--panel2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+}
+
+.modal__top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.modal__title{
+  margin:0;
+  font-size:18px;
+}
+
+.modal__meta{
+  margin:6px 0 0;
+  color: var(--muted);
+  font-size:13px;
+}
+
+.modal__close{
+  cursor:pointer;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:10px;
+  padding:6px 10px;
+}
+
+.modal__section{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+}
+
+.modal__row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* Inputs/select dentro del modal */
+.modal__row select,
+.modal__row input{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+}
+.modal__row input{min-width:220px;}
+
+/* Select visible */
+.select-dark{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+}
+.select-dark option{
+  background:#0f172a;
+  color:#e5e7eb;
+}
+
+.input-dark{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+}
+
+.hint{
+  margin:10px 0 0;
+  color: var(--muted);
+  font-size:12px;
+}
+
+/* =========================
+   PÍLDORAS (estado / etiquetas)
+   ========================= */
+
+.pill-ok{ color:#22c55e; }
+.pill-bad{ color:#ef4444; }
+.pill-warn{ color:#f59e0b; margin-left:8px; }

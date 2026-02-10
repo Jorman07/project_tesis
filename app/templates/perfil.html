@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% block title %}Mi Perfil - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<div class="card">
+  <h2>Mi Perfil</h2>
+  <p style="color:var(--muted); margin-top:6px;">
+    Usuario: <b>{{ user.nombre }}</b> • CI: <b>{{ user.cedula }}</b> • Rol: <b>{{ user.rol }}</b>
+  </p>
+
+  <div style="margin-top:16px; border-top:1px solid var(--border); padding-top:16px;">
+    <h3 style="margin:0 0 10px;">Cambiar contraseña</h3>
+
+    <form method="POST" action="{{ url_for('main.perfil_change_password') }}" style="display:grid; gap:10px; max-width:420px;">
+      <input name="old_password" type="password" placeholder="Contraseña actual" required
+        style="padding:10px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--text);">
+      <input name="new_password" type="password" placeholder="Nueva contraseña" required
+        style="padding:10px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--text);">
+      <button class="menu__item" type="submit" style="max-width:180px;">Guardar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+  <p>{{ data.footer }}</p>
+  <p>{{ data.autor }}</p>
+{% endblock %}

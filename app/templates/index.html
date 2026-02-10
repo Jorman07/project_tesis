@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{data.title}}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+</head>
+<body>
+
+    <div class="app" id="app">
+
+    <aside class="sidebar">
+      <div class="sidebar__header">
+        <h1 class="brand">{{data.name_project}}</h1>
+        <p class="brand__sub">Tipo ChatPDF para Excel</p>
+      </div>
+      <nav class="menu">
+        <button class="menu__item" data-menu="visualizacion"><span class="dot"></span>Visualización de archivos</button>
+        <button class="menu__item" data-menu="carga"><span class="dot"></span>Carga de archivos</button>
+      </nav>
+      <div class="sidebar__content" id="sidebarContent"></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar__left">
+          <span class="pulse"></span>
+          <span>Suba aquí su Excel</span>
+        </div>
+        <div class="topbar__right">
+          <button id="btnSelect" class="btn btn--ghost">Seleccionar archivo</button>
+          <input id="fileInput" type="file" class="hidden" accept=".xlsx,.xls,.csv" />
+          <button onclick="logout()" class="btn" style="background: #ef4444; color: white; margin-left: 10px;">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <section class="content" id="rightContent">
+
+        <div id="visualView">
+          <div id="dropZone" class="dropzone">
+            <div class="dropzone__inner">
+              <div class="dropzone__icon">📄</div>
+              <h3>Arrastra y suelta tu Excel o CSV</h3>
+              <p>O usa el botón <strong>Seleccionar archivo</strong> en la barra superior.</p>
+            </div>
+          </div>
+
+          <div id="messages" class="messages"></div>
+
+          <div id="previewCard" class="card hidden">
+            <div class="card__header">
+              <div>
+                <div id="fileName" class="file-name"></div>
+                <div id="fileMeta" class="file-meta"></div>
+              </div>
+              <div class="actions">
+                <button id="btnPreview" class="btn">Previsualizar</button>
+                <button id="btnRemove" class="btn btn--outline">Quitar</button>
+              </div>
+            </div>
+            <div class="card__body" id="previewBody"></div>
+          </div>
+        </div>
+
+        <div id="cardsView" class="hidden">
+          <div class="filters">
+            <button id="btnMapToggle" class="btn btn--outline">Configurar mapeo</button>
+            <input id="fNombre" class="input" placeholder="Filtrar por nombre..." />
+            <button id="btnClear" class="btn btn--outline">Limpiar</button>
+            <button id="btnEnsureData" class="btn">Actualizar datos</button>
+          </div>
+
+          <div id="mapPanel" class="map hidden"></div>
+          <div id="cardsGrid" class="grid"></div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+    console.log("Verificando autorización en index.html");
+    console.log("localStorage.logged:", localStorage.getItem("logged"));
+    
+    // Verificar si está logueado ANTES de cargar nada
+    const isLogged = localStorage.getItem("logged") === "true";
+    console.log("isLogged:", isLogged);
+    
+    if (!isLogged) {
+      console.log("No autorizado - redirigiendo a login.html");
+      window.location.href = "/login";
+    } else {
+      console.log("Usuario autorizado - cargando app");
+    }
+    
+    // Función para cerrar sesión
+    window.logout = function() {
+      console.log("Cerrando sesión...");
+      console.log("Antes - localStorage.logged:", localStorage.getItem("logged"));
+      localStorage.removeItem("logged");
+      console.log("Después - localStorage.logged:", localStorage.getItem("logged"));
+      window.location.href = '/login';
+    };
+  </script>
+
+  <!-- SheetJS (necesario para leer Excel) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+
+  <script src="{{ url_for('static', filename='js/ui.js') }}" type="module"></script>
+  <script src="{{ url_for('static', filename='js/xlsx-loader.js') }}" type="module"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}" type="module"></script>
+
+
+</body>
+</html>

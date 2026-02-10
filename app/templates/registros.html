@@ -1,0 +1,121 @@
+{% extends 'layout.html' %}
+{% block title %}Registros - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registros.css') }}">
+
+<div class="card registros-page">
+
+  <div class="users-head">
+    <div>
+      <h2 class="users-title">Registros</h2>
+      <p class="users-subtitle">Utilice los filtros para buscar registros específicos.</p>
+    </div>
+  </div>
+
+  <div class="users-filters registros-filters">
+    <select id="fYear" class="uf-input">
+      <option value="">Año: Todos</option>
+    </select>
+
+    <select id="fMonth" class="uf-input">
+      <option value="">Mes: Todos</option>
+      <option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option>
+      <option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option>
+      <option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option>
+      <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+    </select>
+
+    <select id="fDay" class="uf-input">
+      <option value="">Día: Todos</option>
+    </select>
+
+    <select id="fSexo" class="uf-input">
+      <option value="">Sexo: Todos</option>
+      <option value="MASCULINO">MASCULINO</option>
+      <option value="FEMENINO">FEMENINO</option>
+    </select>
+
+    <input id="fEdadMin" class="uf-input" type="number" min="0" placeholder="Edad mín (años)">
+    <input id="fEdadMax" class="uf-input" type="number" min="0" placeholder="Edad máx (años)">
+
+    <input id="fEsquema" class="uf-input" placeholder="Esquema...">
+    <input id="fGrupo" class="uf-input" placeholder="Grupo de riesgo...">
+
+    <input id="fCedula" class="uf-input" placeholder="Buscar cédula...">
+    <input id="fNombre" class="uf-input" placeholder="Buscar nombre/apellidos...">
+    <input id="fVacuna" class="uf-input" placeholder="Buscar vacuna (raw/canon)...">
+
+    <select id="fEstado" class="uf-input">
+      <option value="">Estado: Valido + Conflicto</option>
+      <option value="VALIDO">VALIDO</option>
+      <option value="CONFLICTO">CONFLICTO</option>
+      <option value="INVALIDO">INVALIDO</option>
+    </select>
+
+    <button id="btnClear" class="btn-mini">Limpiar</button>
+  </div>
+
+  <p id="msgReg" class="form-msg"></p>
+
+  <div class="table-wrap reg-limit">
+    <table class="ut" id="regTable">
+      <thead>
+        <tr>
+          <th>Fecha Vac</th>
+          <th>Cédula</th>
+          <th>Paciente</th>
+          <th>Sexo</th>
+          <th>Edad</th>
+          <th>Vacuna (RAW)</th>
+          <th>Vacuna (CANON)</th>
+          <th>Dosis</th>
+          <th>Esquema</th>
+          <th>Grupo Riesgo</th>
+          <th>Estado</th>
+          <th>Periodo</th>
+        </tr>
+      </thead>
+      <tbody id="regBody"></tbody>
+    </table>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+  <!-- Buscar paciente -->
+  <div class="patient-section">
+    <div class="patient-head">
+      <div>
+        <h3 class="patient-title">Buscar paciente</h3>
+        <p class="patient-sub">Historial de vacunacion por cedula.</p>
+      </div>
+    </div>
+
+    <div class="patient-search">
+      <input id="pCedula" class="uf-input" placeholder="Ingrese cédula del paciente...">
+      <button id="btnBuscarPaciente" class="btn-back">Buscar</button>
+      <button id="btnLimpiarPaciente" class="btn-mini">Limpiar</button>
+    </div>
+
+    <p id="msgPaciente" class="form-msg"></p>
+
+    <div id="patientSummary" class="detail-card hidden">
+      <div class="detail-head">
+        <h4 class="detail-title">Resumen del paciente</h4>
+        <div class="detail-summary" id="patientMeta"></div>
+      </div>
+      <div id="patientFields" class="patient-fields"></div>
+    </div>
+
+    <div id="patientVaccines" class="vaccines-grid hidden"></div>
+  </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/registros.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<p>{{ data.footer }}</p>
+<p>{{ data.autor }}</p>
+{% endblock %}

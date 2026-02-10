@@ -1,0 +1,695 @@
+version: "3.1"
+
+nlu:
+  - intent: ayuda
+    examples: |
+      - ayuda
+      - qué consultas puedes responder
+      - como me puedes ayudar
+      - como consulto
+      - ejemplos
+
+  - intent: reporte_mensual
+    examples: |
+      - reporte [2025-12](periodo)
+      - resumen de [diciembre 2025](periodo)
+      - informe mensual [2026-01](periodo)
+      - vacunación en [noviembre 2025](periodo)
+      - dame el total de vacunas del mes de [septiembre 2025](periodo)
+      - total de vacunas del mes de [septiembre del 2025](periodo)
+      - total de vacunas en [septiembre 2025](periodo)
+      - total de dosis del mes [2025-09](periodo)
+      - total del mes [2025-09](periodo)
+      - cuantas dosis hubo en [septiembre 2025](periodo)
+      - reporte [octubre 2025](periodo)
+      - reporte de [octubre 2025](periodo)
+      - dame el reporte de [octubre 2025](periodo)
+      - resumen [octubre 2025](periodo)
+      - resumen mensual [octubre 2025](periodo)
+      - reporte [noviembre 2025](periodo)
+      - reporte [enero 2026](periodo)
+      - reporte de [enero 2026](periodo)
+      - resumen [enero 2026](periodo)
+      - reporte [2026-01](periodo)
+      - reporte mensual de [2025-10](periodo)
+      - dame el reporte de [octubre 2025](periodo)
+      - dame el reporte del [octubre 2025](periodo)
+      - reporte del mes [octubre 2025](periodo)
+      - reporte mes [2025-10](periodo)
+      - reporte [2025/10](periodo)
+      - reporte [10/2025](periodo)
+      - resumen [oct-2025](periodo)
+      - resumen [oct 2025](periodo)
+      - reporte de [sep 2025](periodo)
+      - reporte de [set 2025](periodo)
+      - dame el resumen de [2025-11](periodo)
+
+  - intent: paciente_historial
+    examples: |
+      - historial [0967894387](cedula)
+      - historial del paciente [0967894387](cedula)
+      - registros del paciente [0967894387](cedula)
+      - historial de vacunas del paciente [0931430433](cedula)
+      - qué vacunas tiene el paciente [0931430433](cedula)
+      - muéstrame qué vacunas tiene este paciente [0931430433](cedula)
+      - vacunas aplicadas del paciente [0931430433](cedula)
+
+  - intent: contar_vacuna_dia
+    examples: |
+      - cuántos se vacunaron con [Influenza](vacuna) el [2025-12-10](fecha)
+      - cuántos con [BCG](vacuna) el [2025-12-10](fecha)
+      - total de [DT](vacuna) el [10/12/2025](fecha)
+
+  - intent: contar_vacuna_mes
+    examples: |
+      - cuantas vacunas de [DT adulto](vacuna) se administraron en [diciembre 2025](periodo)
+      - cuantos se vacunaron con [DT adulto](vacuna) en [diciembre 2025](periodo)
+      - total de [DT adulto](vacuna) en [2025-12](periodo)
+      - dosis de [INFLUENZA ADULTO](vacuna) en [2025-12](periodo)
+      - cuántas dosis de [BCG](vacuna) hubo en [noviembre 2025](periodo)
+      - en [2025-12](periodo) cuantas dosis fueron de [DT](vacuna)
+      - total de vacunados con [SRP](vacuna) en [septiembre 2025](periodo)
+      - cuantas dosis de [SRP](vacuna) en [septiembre 2025](periodo)
+      - [SRP](vacuna) en [septiembre 2025](periodo)
+      - [DT adulto](vacuna) en [diciembre 2025](periodo)
+      - cuantas dosis de [HB ADULTO](vacuna) en [enero 2026](periodo)
+      - cuantas dosis de [HB PEDIATRICA](vacuna) en [enero 2026](periodo)
+      - cuantas dosis de [HB](vacuna) en [enero 2026](periodo)
+      - cuantas dosis de [INFLUENZA PEDIATRICA](vacuna) en [diciembre 2025](periodo)
+      - dosis de [INFLUENZA PEDIATRICA](vacuna) en [2025-12](periodo)
+      - cuantas dosis de [influenza pediatrica](vacuna) en [enero 2026](periodo)
+      - total de [influenza pediatrica](vacuna) en [2026-01](periodo)
+
+  - intent: pregunta_incompleta
+    examples: |
+      - dosis de [SRP](vacuna)
+      - cuantas dosis de [DT](vacuna)
+      - total de [SRP](vacuna)
+      - vacunas de [SRP](vacuna)
+
+  - intent: saludo
+    examples: |
+      - hola
+      - buenas
+      - buen día
+      - buenas tardes
+      - hey
+      - qué tal
+      - buenas noches
+      - Hola personal de salud
+
+  - intent: despedida
+    examples: |
+      - gracias, eso era todo
+      - listo gracias
+      - chau
+      - hasta luego
+
+  - intent: bot_info
+    examples: |
+      - quién eres
+      - eres un bot?
+      - qué puedes hacer
+      - qué consultas manejas
+
+  - intent: out_of_scope
+    examples: |
+      - cuéntame un chiste
+      - quién es el presidente
+      - ayúdame con mi tarea de matemáticas
+      - cómo instalo windows
+
+  - intent: datos_personales
+    examples: |
+      - qué datos personales guardan del paciente
+      - qué información almacena el sistema
+      - tienes datos personales de los pacientes
+
+  - intent: paciente_dato
+    examples: |
+      - [parroquia](campo_paciente) del paciente [0967894387](cedula)
+      - cuál es la [parroquia](campo_paciente) del paciente [0967894387](cedula)
+      - [edad](campo_paciente) del paciente [0967894387](cedula)
+      - [cantón](campo_paciente) del paciente [0967894387](cedula)
+      - [captación](campo_paciente) del paciente [0967894387](cedula)
+      - [establecimiento](campo_paciente) del paciente [0967894387](cedula)
+      - [próxima dosis](campo_paciente) del paciente [0967894387](cedula)
+      - cuál es la [próxima dosis](campo_paciente) del paciente [0967894387](cedula)
+      - parroquia del paciente [0967894387](cedula)
+      - cuál es la parroquia del paciente [0967894387](cedula)
+      - próxima dosis del paciente [0967894387](cedula)
+      - captación del paciente [0967894387](cedula)
+      - establecimiento del paciente [0967894387](cedula)
+      - edad del paciente [0967894387](cedula)
+      - canton del paciente [0967894387](cedula)
+      - cuándo le toca la [próxima dosis](campo_paciente) al paciente [0931430433](cedula)
+      - cuándo es la [próxima dosis](campo_paciente) del paciente [0931430433](cedula)
+      - para cuándo es la [próxima dosis](campo_paciente) del paciente [0931430433](cedula)
+      - cuándo le corresponde la [próxima dosis](campo_paciente) al paciente [0931430433](cedula)
+      - [captación](campo_paciente) del paciente [0931430433](cedula)
+      - [captacion](campo_paciente) del paciente [0931430433](cedula)
+      - cuál es la [captación](campo_paciente) del paciente [0931430433](cedula)
+      - a qué [establecimiento](campo_paciente) se vacunó el paciente [0931430433](cedula)
+      - [establecimiento](campo_paciente) del paciente [0931430433](cedula)
+      - [nombres](campo_paciente) del paciente [0931430433](cedula)
+      - cuáles son los [nombres](campo_paciente) del paciente [0931430433](cedula)
+      - cuando es la [próxima dosis](campo_paciente)
+      - cuando le toca la [próxima dosis](campo_paciente)
+      - [captación](campo_paciente)
+      - [establecimiento](campo_paciente)
+      - [edad](campo_paciente)
+      - [parroquia](campo_paciente)
+
+  - intent: top_vacuna_periodo
+    examples: |
+      - cuál fue la vacuna con más dosis en [octubre 2025](periodo)
+      - cuál fue la vacuna más aplicada en [2025-10](periodo)
+      - vacuna con mayor aplicación en [noviembre 2025](periodo)
+      - top 1 vacuna en [2025-12](periodo)
+      - cuál es la vacuna #1 en [septiembre 2025](periodo)
+
+  - intent: paciente_info_personal
+    examples: |
+      - dame información personal del paciente [0968170084](cedula)
+      - datos personales del paciente [0968170084](cedula)
+      - información del paciente [0968170084](cedula)
+      - datos del paciente [0968170084](cedula)
+
+  - intent: paciente_dato_multiple
+    examples: |
+      - [parroquia](campo_paciente), [edad](campo_paciente) y [próxima dosis](campo_paciente) del paciente [0968170084](cedula)
+      - necesito [parroquia](campo_paciente) y [edad](campo_paciente) del paciente [0968170084](cedula)
+      - [parroquia](campo_paciente) [edad](campo_paciente) [próxima dosis](campo_paciente) paciente [0968170084](cedula)
+
+  - intent: conteo_captacion_periodo
+    examples: |
+      - cuántas vacunas por captación [temprana](captacion) se dieron en [septiembre 2025](periodo)
+      - cuántas dosis por captación [tardía](captacion) en [noviembre 2025](periodo)
+      - total por captación [temprana](captacion) en [2025-09](periodo)
+      - cuántas vacunas por captación [temprana](captacion) en [diciembre 2025](periodo)
+      - cuántas vacunas por captación [tardia](captacion) en [diciembre 2025](periodo)
+      - cuántos pacientes por captación [tardia](captacion) en [2025-12](periodo)
+      - dosis por captación [temprana](captacion) [2025-12](periodo)
+      - dosis por captación [tardia](captacion) [2025-12](periodo)
+      - cuantas vacunas por capatcion [temprana](captacion) se dieron [diciembre 2025](periodo)
+      - cuantas vacunas por capatcion [tardia](captacion) se dieron [diciembre 2025](periodo)
+      - cuantas dosis por captacion [temprana](captacion)
+      - y por captacion [temprana](captacion)
+      - y por [temprana](captacion)
+      - y por capatacion [tardia](captacion)
+      - y por [tardia](captacion)
+      - cuántas dosis por captación [temprana](captacion) en [noviembre 2025](periodo)
+      - cuántas dosis por [campaña](captacion) en [noviembre 2025](periodo)
+      - cuántas vacunas de [campaña](captacion) en [2025-12](periodo)
+      - dosis por [campana](captacion) [2025-12](periodo)
+      - [campaña](captacion) en [septiembre 2025](periodo)
+      - y por [campaña](captacion)
+
+
+
+  - intent: conteo_total_dia
+    examples: |
+      - cuántas personas se vacunaron el [2025-09-17](fecha)
+      - cuántos pacientes vacunados el [17/09/2025](fecha)
+      - total de vacunados el [2025-12-10](fecha)
+      - cuántos se vacunaron el [10/12/2025](fecha)
+
+  - intent: top_mes_anio
+    examples: |
+      - cuál fue el mes con más dosis en [2025](anio)
+      - mes con más vacunación en [2025](anio)
+      - en [2024](anio) qué mes tuvo más dosis
+
+  - intent: insumo_categorias
+    examples: |
+      - qué categorías de insumos hay
+      - lista de categorías de insumos
+      - muéstrame las categorías disponibles
+      - categorías de inventario
+      - qué categorías existen en insumos
+      - insumos
+
+  - intent: insumo_stock_tipo
+    examples: |
+      - stock de [JERINGAS](insumo_categoria)
+      - existencia de [JERINGAS](insumo_categoria)
+      - inventario de [JERINGAS](insumo_categoria)
+      - cuánto hay de [JERINGAS](insumo_categoria)
+      - stock de [23G x 1" 0.5ml](insumo_tipo)
+      - existencia de [Precargada](insumo_tipo)
+      - cuántas [unidades](unidad) hay de [27G x 3/8" 1ml](insumo_tipo)
+      - cuántos [packs](unidad) hay de [23G x 1" 1ml](insumo_tipo)
+      - total de [unidades](unidad) en [22G x 1 1/2" 0.5ml](insumo_tipo)
+      - stock de jeringas [0.5ml](insumo_tipo)
+      - disponibilidad de [JERINGAS](insumo_categoria) tipo [23G x 1" 0.5ml](insumo_tipo)
+      - cuántas jeringas [Precargada](insumo_tipo) hay
+      - stock de [ALCOHOL](insumo_categoria)
+      - stock de alcohol de [500ml](insumo_tipo)
+      - stock de alcohol de [1000ml](insumo_tipo)
+      - stock de [ALGODON](insumo_categoria)
+      - stock de [GUANTES](insumo_categoria)
+      - stock de guantes [large](insumo_tipo)
+      - stock de guantes [xlarge](insumo_tipo)
+      - stock de alcohol de [250ml](insumo_tipo)
+      - stock de [ALCOHOL](insumo_categoria) de [250ml](insumo_tipo)
+      - stock de [ALGODON](insumo_categoria)
+      - algodón
+      - stock de algodon
+
+  - intent: insumo_lotes_tipo
+    examples: |
+      - lotes de [23G x 1" 0.5ml](insumo_tipo)
+      - muéstrame los lotes de [Precargada](insumo_tipo)
+      - qué lotes hay de [27G x 3/8" 1ml](insumo_tipo)
+      - caducidad por lote de [25G x 5/8" 0.5ml](insumo_tipo)
+      - fechas de caducidad de [22G x 1 1/2" 1ml](insumo_tipo)
+      - lotes de [JERINGAS](insumo_categoria) tipo [23G x 1" 1ml](insumo_tipo)
+      - lotes disponibles de [23G x 1" 0.5ml](insumo_tipo)
+
+  - intent: insumo_por_caducar
+    examples: |
+      - insumos por caducar en [30](exp_days) días
+      - qué insumos caducan en [60](exp_days) días
+      - lotes que caducan en [15](exp_days) días de [JERINGAS](insumo_categoria)
+      - jeringas que caducan en [90](exp_days) días
+      - y en [90](exp_days) días
+      - y en [90](exp_days) dias
+      - y en [60](exp_days) días
+      - y en [60](exp_days) dias
+      - y en [30](exp_days) días
+      - y en [30](exp_days) dias
+
+  - intent: insumo_biologicos_asociados
+    examples: |
+      - qué biológicos usan [23G x 1" 0.5ml](insumo_tipo)
+      - biológicos asociados a [Precargada](insumo_tipo)
+      - para qué biológicos sirve la [23G x 1" 1ml](insumo_tipo)
+      - qué vacunas se aplican con [27G x 3/8" 0.05ml](insumo_tipo)
+      - qué biológico está asociado al tipo [26G x 3/8" 1ml TB](insumo_tipo)
+
+  - intent: biologico_detalle
+    examples: |
+      - cuál es la [vía](campo_biologico) de [BCG](biologico)
+      - cuál es el [ángulo](campo_biologico) de [BCG](biologico)
+      - [dosis por frasco](campo_biologico) de [BCG](biologico)
+      - [dosis administrada](campo_biologico) de [BCG](biologico)
+      - [descripción](campo_biologico) de [BCG](biologico)
+      - vía y ángulo del biológico [BCG](biologico)
+      - dime la vía del biológico [HEXAVALENTE](biologico)
+      - dime la [vía](campo_biologico) de [HEXAVALENTE](biologico)
+      - cuál es el [ángulo](campo_biologico) de [HEXAVALENTE](biologico)
+      - cuál es la [descripción](campo_biologico) de [HEXAVALENTE](biologico)
+      - [dosis por frasco](campo_biologico) de [HEXAVALENTE](biologico)
+      - [dosis administrada](campo_biologico) de [HEXAVALENTE](biologico)
+      - cuántos [frascos](campo_biologico) tiene [HEXAVALENTE](biologico)
+      - cuántas [cajas](campo_biologico) hay de [HEXAVALENTE](biologico)
+      - [fecha de caducidad](campo_biologico) de [HEXAVALENTE](biologico)
+      - dame el [lote](campo_biologico) de [HEXAVALENTE](biologico)
+      - detalle del biológico [HEXAVALENTE](biologico)
+      - información del biológico [HEXAVALENTE](biologico)
+      - [vía](campo_biologico) de [SRP](biologico)
+      - [via](campo_biologico) de [SRP](biologico)
+      - [ángulo](campo_biologico) de [SRP](biologico)
+      - [descripcion](campo_biologico) de [SRP](biologico)
+      - cuántos [frascos](campo_biologico) tiene [SRP](biologico)
+      - frascos de biologios de [SRP](biologico)
+      - frascos de biológicos de [HEXAVALENTE](biologico)
+      - detalles de [HEXAVALENTE](biologico)
+      - via de [SRP](biologico)
+
+  - intent: pacientes_proxima_dosis_hoy
+    examples: |
+      - qué pacientes tienen próxima dosis hoy
+      - qué pacientes les corresponde vacuna hoy
+      - pacientes con vacuna para hoy
+      - listado de pacientes con próxima dosis hoy
+      - quiénes tienen cita de vacunación hoy
+      - a quiénes les toca la próxima dosis hoy
+      - pacientes pendientes para hoy
+      - que pacientes les corressponda vacunas hoy
+      - quienes tienen proxima dosis hoy
+      - pendientes de vacuna para hoy
+
+  - intent: vacunacion_query
+    examples: |
+      - vacunación en [2025-09](periodo)
+      - vacunación en [septiembre 2025](periodo)
+      - datos de vacunación de [2025-12](periodo)
+      - información de vacunación del mes [2025-10](periodo)
+      - consulta de vacunación [2025-11](periodo)
+      - reporte general de vacunación de [diciembre 2025](periodo)
+      - resumen general del periodo [2025-09](periodo)
+      - estadísticas generales de [2025-10](periodo)
+      - comportamiento de la vacunación en [noviembre 2025](periodo)
+      - cómo estuvo la vacunación en [2025-12](periodo)
+      - vacunación del día [2025-09-17](fecha)
+      - registros de vacunación del [17/09/2025](fecha)
+      - datos de vacunación en la fecha [2025-10-01](fecha)
+      - consulta de vacunación del [10/12/2025](fecha)
+      - reporte de vacunación para [2025-09-01](fecha)
+      - necesito un reporte de vacunación de [2025-09](periodo)
+      - dame información del mes [2025-12](periodo)
+      - muéstrame el reporte del periodo [2025-11](periodo)
+      - quiero ver los datos del periodo [septiembre 2025](periodo)
+      - revisa la vacunación del mes [diciembre 2025](periodo)
+      - vacunación de hoy
+      - vacunación de ayer
+      - vacunación de este mes
+      - vacunación del mes pasado
+      - dosis de hoy
+      - dosis de ayer
+
+  # ---------------- LOOKUPS / REGEX / SYNONYMS ----------------
+
+  - lookup: campo_biologico
+    examples: |
+      - via
+      - vía
+      - angulo
+      - ángulo
+      - descripcion
+      - descripción
+      - dosis por frasco
+      - dosis administrada
+      - cajas
+      - frascos
+      - frascos por caja
+      - lote
+      - fecha de caducidad
+      - caducidad
+
+  - synonym: via
+    examples: |
+      - vía
+      - via
+
+  - synonym: angulo
+    examples: |
+      - ángulo
+      - angulo
+
+  - synonym: descripcion
+    examples: |
+      - descripción
+      - descripcion
+
+  - synonym: fecha_caducidad
+    examples: |
+      - caducidad
+      - fecha de caducidad
+
+  - regex: anio
+    examples: |
+      - \b(19|20)\d{2}\b
+
+  - lookup: mes
+    examples: |
+      - enero
+      - febrero
+      - marzo
+      - abril
+      - mayo
+      - junio
+      - julio
+      - agosto
+      - septiembre
+      - setiembre
+      - octubre
+      - noviembre
+      - diciembre
+      - ene
+      - feb
+      - mar
+      - abr
+      - may
+      - jun
+      - jul
+      - ago
+      - sep
+      - set
+      - oct
+      - nov
+      - dic
+
+
+
+
+  - lookup: captacion
+    examples: |
+      - temprana
+      - tardia
+      - tardía
+      - campaña
+      - campana
+      - campania
+      - captación temprana
+      - captacion temprana
+      - captación tardía
+      - captacion tardia
+      - capatacion tardia
+      - capatacion temprana
+      - captación campaña
+      - captacion campaña
+      - capatacion campaña
+
+  - synonym: temprana
+    examples: |
+      - captación temprana
+      - captacion temprana
+      - capatacion temprana
+      - esquema temprana
+
+  - synonym: tardia
+    examples: |
+      - tardía
+      - captación tardía
+      - captacion tardia
+      - capatacion tardia
+      - esquema tardia
+      - esquema tardía
+  
+  - synonym: campania
+    examples: |
+      - campaña
+      - campana
+      - captación campaña
+      - captacion campaña
+      - esquema campaña
+      - esquema campana
+      - campania
+
+
+  - lookup: campo_paciente
+    examples: |
+      - nombres
+      - apellidos
+      - primer nombre
+      - segundo nombre
+      - primer apellido
+      - segundo apellido
+      - apellido materno
+      - apellido paterno
+      - parroquia
+      - canton
+      - cantón
+      - captacion
+      - captación
+      - esquema
+      - establecimiento
+      - edad
+      - proxima dosis
+      - próxima dosis
+      - dosis pendiente
+
+  - synonym: proxima_dosis
+    examples: |
+      - proxima dosis
+      - próxima dosis
+      - dosis pendiente
+
+  - synonym: canton
+    examples: |
+      - cantón
+      - canton
+
+  - synonym: captación
+    examples: |
+      - captacion
+      - captación
+      - esquema
+      - ESQUEMA
+
+  - lookup: insumo_categoria
+    examples: |
+      - ALCOHOL
+      - ALGODON
+      - GUANTES
+      - JERINGAS
+
+  - synonym: ALGODON
+    examples: |
+      - algodón
+      - algodon
+
+  - synonym: ALCOHOL
+    examples: |
+      - alcohol
+      - alcohol al 70%
+      - alcohol 70%
+      - alcohol isopropílico
+      - alcohol isopropanol
+      - isopropílico
+
+  - synonym: GUANTES
+    examples: |
+      - guantes
+      - guante
+
+  - synonym: JERINGAS
+    examples: |
+      - jeringas
+      - jeringa
+      - inyecciones
+      - inyeccion
+      - inyección
+      - inyecciones
+
+  - lookup: insumo_tipo
+    examples: |
+      - 22G x 1 1/2" 0.5ml
+      - 22G x 1 1/2" 1ml
+      - 23G x 1" 0.5ml
+      - 23G x 1" 1ml
+      - 25G x 1/8" 1ml
+      - 25G x 5/8" 0.5ml
+      - 26G x 3/8" 1ml TB
+      - 27G x 3/8" 0.05ml
+      - 27G x 3/8" 1ml
+      - Precargada
+      - 500ml
+      - 250ml
+      - 1000ml
+      - large
+      - xlarge
+      - medium
+      - rollo
+
+
+  - lookup: unidad
+    examples: |
+      - packs
+      - paquetes
+      - cajas
+      - unidades
+      - frascos
+
+  - synonym: packs
+    examples: |
+      - paquetes
+      - cajas
+
+  - synonym: unidades
+    examples: |
+      - unidad
+      - unidades
+
+  - regex: exp_days
+    examples: |
+      - \b\d{1,3}\b
+
+  - regex: cedula
+    examples: |
+      - \b\d{10}\b
+
+  - regex: periodo
+    examples: |
+      - (?i)\b(19|20)\d{2}-(0[1-9]|1[0-2])\b
+      - (?i)\b(19|20)\d{2}/(0[1-9]|1[0-2])\b
+      - (?i)\b(0[1-9]|1[0-2])[-/](19|20)\d{2}\b
+      - (?i)\b(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\s+(19|20)\d{2}\b
+      - (?i)\b(ene|feb|mar|abr|may|jun|jul|ago|sep|set|oct|nov|dic)[\s\-\/]+(19|20)\d{2}\b
+
+
+  - regex: fecha
+    examples: |
+      - \b\d{4}-\d{2}-\d{2}\b
+      - \b\d{2}/\d{2}/\d{4}\b
+
+  - lookup: biologico
+    examples: |
+      - SRP
+      - DT
+      - DT adulto
+      - INFLUENZA ADULTO
+      - INFLUENZA PEDIATRICA
+      - BCG
+      - HEXAVALENTE
+      - PENTAVALENTE
+      - IPV
+      - FIEBRE AMARILLA
+      - VARICELA
+      - HEPATITIS B
+      - HB ADULTO
+      - HB PEDIATRICA
+      - FA
+      - ROTAVIRUS
+      - NEUMOCOCO13
+      - SPIKEVAX
+      - COVID
+      - FIVP
+      - VPH
+
+  - lookup: vacuna
+    examples: |
+      - SRP
+      - DT
+      - DT adulto
+      - INFLUENZA ADULTO
+      - INFLUENZA PEDIATRICA
+      - BCG
+      - HEXAVALENTE
+      - PENTAVALENTE
+      - IPV
+      - FIEBRE AMARILLA
+      - VARICELA
+      - HEPATITIS B
+      - HB ADULTO
+      - HB PEDIATRICA
+      - FA
+      - ROTAVIRUS
+      - NEUMOCOCO13
+      - SPIKEVAX
+      - COVID
+      - FIVP
+      - VPH
+
+  - synonym: SRP
+    examples: |
+      - srp
+      - triple viral
+      - sarampión rubéola paperas
+
+  - synonym: HB ADULTO
+    examples: |
+      - hb adulto
+      - hepatitis b adulto
+      - hep b adulto
+      - hb-adulto
+      - hb
+
+  - synonym: HEPATITIS B
+    examples: |
+      - hepatitis b
+      - hep b
+      - hepatitisb
+
+  - synonym: INFLUENZA PEDIATRICA
+    examples: |
+      - influenza pediatrica
+      - influenza pediátrica
+      - influenza niño
+      - influenza niños
+      - influenza infantil
+      - pediatrica
+      - pediátrica
+

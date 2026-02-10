@@ -1,0 +1,226 @@
+.hidden{ display:none !important; }
+
+.archivos-page{ display:flex; flex-direction:column; gap:14px; }
+
+.archivos-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.archivos-title{ margin:0; font-size:20px; }
+.archivos-sub{ margin:6px 0 0; color:var(--muted); font-size:13px; }
+
+/* barra de carga */
+.archivos-toolbar{
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* filtros */
+.archivos-filters{
+  margin-top:14px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* inputs estilo usuarios */
+.uf-input{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+  min-width:220px;
+}
+
+.uf-input:focus{
+  outline:none;
+  border-color:var(--brand);
+  box-shadow:0 0 0 3px rgba(34,197,94,0.12);
+}
+
+.uf-input option{
+  background:#0f172a;
+  color:#e5e7eb;
+}
+
+/* botones */
+.btn-back{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn-back:hover{
+  border-color: var(--brand);
+  background: rgba(34,197,94,0.08);
+}
+
+.btn-back:disabled{
+  opacity:0.55;
+  cursor:not-allowed;
+}
+
+.btn-mini{
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+  cursor:pointer;
+}
+
+.btn-mini:hover{
+  border-color:var(--brand);
+  background:rgba(34,197,94,0.08);
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* mensajes */
+.form-msg{
+  margin-top:6px;
+  min-height:18px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* preview cards */
+.detail-card{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255,255,255,0.03);
+  padding:14px;
+  margin-top:12px;
+}
+
+.detail-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.detail-title{ margin:0; font-size:14px; }
+
+.detail-summary{
+  color:var(--muted);
+  font-size:13px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.hint{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+/* tabla */
+.table-wrap{
+  margin-top:12px;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1100px;
+  font-size:13px;
+}
+
+.table th{
+  padding:10px;
+  text-align:left;
+  background:rgba(255,255,255,0.04);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+
+.table td{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+
+.right{ text-align:right; }
+
+/* scrollbar discreto */
+.table-wrap::-webkit-scrollbar{ height:6px; width:6px; }
+.table-wrap::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.08); border-radius:10px; }
+.table-wrap::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.14); }
+.table-wrap::-webkit-scrollbar-track{ background: transparent; }
+.table-wrap{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) transparent; }
+
+/* modal */
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal__backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.55);
+}
+
+.modal__card{
+  position:relative;
+  width:min(980px, 95vw);
+  background: var(--panel2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+}
+
+.modal__top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.modal__title{ margin:0; font-size:18px; }
+.modal__meta{ margin:6px 0 0; color: var(--muted); font-size:13px; }
+
+.modal__close{
+  cursor:pointer;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:10px;
+  padding:6px 10px;
+}
+
+.file-name{
+  font-size:13px;
+  color:var(--muted);
+  padding-left:6px;
+  white-space:nowrap;
+}

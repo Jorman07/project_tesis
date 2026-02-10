@@ -1,0 +1,138 @@
+version: "3.1"
+
+rules:
+  - rule: Ayuda
+    steps:
+      - intent: ayuda
+      - action: utter_ayuda
+  
+
+  - rule: Reporte mensual
+    steps:
+      - intent: reporte_mensual
+      - action: action_reporte_mensual
+
+  - rule: Historial
+    steps:
+      - intent: paciente_historial
+      - action: action_paciente_historial
+
+  - rule: Dato del paciente
+    steps:
+      - intent: paciente_dato
+      - action: action_paciente_dato
+
+  - rule: Conteo vacuna día
+    steps:
+      - intent: contar_vacuna_dia
+      - action: action_contar_vacuna_dia
+
+  - rule: Saludo
+    steps:
+      - intent: saludo
+      - action: utter_saludo
+
+  - rule: Conteo vacuna mes
+    steps:
+      - intent: contar_vacuna_mes
+      - action: action_contar_vacuna_mes
+
+  - rule: Pregunta incompleta
+    steps:
+      - intent: pregunta_incompleta
+      - action: utter_pedir_periodo
+
+  - rule: Despedida
+    steps:
+      - intent: despedida
+      - action: utter_despedida
+
+  - rule: Info del bot
+    steps:
+      - intent: bot_info
+      - action: utter_bot_info
+
+  - rule: Fuera de alcance
+    steps:
+      - intent: out_of_scope
+      - action: utter_out_of_scope
+
+  - rule: Datos personales
+    steps:
+      - intent: datos_personales
+      - action: utter_datos_personales
+
+  - rule: Top vacuna por periodo
+    steps:
+      - intent: top_vacuna_periodo
+      - action: action_top_vacuna_periodo
+
+  - rule: Info personal paciente
+    steps:
+      - intent: paciente_info_personal
+      - action: action_paciente_info_personal
+
+  - rule: Dato múltiple paciente
+    steps:
+      - intent: paciente_dato_multiple
+      - action: action_paciente_dato_multiple
+
+  - rule: Conteo por captación en periodo
+    steps:
+      - intent: conteo_captacion_periodo
+      - action: action_conteo_captacion_periodo
+
+  - rule: Conteo total día
+    steps:
+      - intent: conteo_total_dia
+      - action: action_conteo_total_dia
+
+  - rule: Mes con más dosis en un año
+    steps:
+      - intent: top_mes_anio
+      - action: action_top_mes_anio
+
+  - rule: Listar categorías de insumos
+    steps:
+      - intent: insumo_categorias
+      - action: action_insumo_categorias
+
+  - rule: Stock por tipo
+    steps:
+      - intent: insumo_stock_tipo
+      - action: action_insumo_stock_tipo
+
+  - rule: Lotes por tipo
+    steps:
+      - intent: insumo_lotes_tipo
+      - action: action_insumo_lotes_tipo
+
+  - rule: Insumos por caducar
+    steps:
+      - intent: insumo_por_caducar
+      - action: action_insumo_por_caducar
+
+  - rule: Biológicos asociados a insumo
+    steps:
+      - intent: insumo_biologicos_asociados
+      - action: action_insumo_biologicos_asociados
+
+  - rule: Detalle de biológico
+    steps:
+      - intent: biologico_detalle
+      - action: action_biologico_detalle
+
+  - rule: Pacientes con próxima dosis hoy
+    steps:
+      - intent: pacientes_proxima_dosis_hoy
+      - action: action_pacientes_proxima_dosis_hoy
+
+  - rule: Comodín vacunación
+    steps:
+      - intent: vacunacion_query
+      - action: action_try_vacunacion_query
+
+  - rule: Fallback
+    steps:
+      - intent: nlu_fallback
+      - action: action_default_fallback

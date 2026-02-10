@@ -1,0 +1,5 @@
+<nav class="menu">
+  {% for item in data.menu %}
+    <a class="menu__item" href="{{ url_for(item.endpoint) }}">{{ item.name }}</a>
+  {% endfor %}
+</nav>

@@ -1,0 +1,191 @@
+{% extends 'layout.html' %}
+{% block title %}Biológicos - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/biologicos.css') }}">
+
+<div class="card biologicos-page">
+
+  <!-- HEADER -->
+  <div class="biologicos-header">
+    <div>
+      <h2 class="biologicos-title" id="pageTitle">Biológicos</h2>
+      <p class="biologicos-sub" id="pageSub">Seleccione un biológico para ver detalles.</p>
+    </div>
+
+    <div class="biologicos-head-actions">
+      <button id="btnBack" class="btn-back hidden" type="button">← Regresar</button>
+      <button id="btnRegistrar" class="btn-back hidden only-manage" type="button">+ Registrar biológico</button>
+    </div>
+  </div>
+
+  <!-- LISTA -->
+  <div id="listView">
+    <div class="types-toolbar">
+      <input id="qBio" class="input" placeholder="Buscar biológico..." />
+    </div>
+    <div class="bio-grid" id="bioContainer"></div>
+  </div>
+
+  <!-- DETALLE -->
+  <div id="detailSection" class="hidden">
+    <div class="detail-card">
+      <div class="detail-head">
+        <h3 class="detail-title" id="detailTitle">Detalle</h3>
+        <div class="detail-summary" id="detailSummary"></div>
+      </div>
+
+      <div id="insumosBlock" class="hidden">
+        <h4 class="section-title">Jeringas asociadas</h4>
+        <ul class="vac-list" id="insumoList"></ul>
+      </div>
+
+      <h4 class="section-title">Inventario por lote</h4>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Lote</th>
+              <th>Caducidad</th>
+              <th>Vía</th>
+              <th class="right">Cajas</th>
+              <th class="right">Frascos/Caja</th>
+              <th class="right">Frascos Totales</th>
+              <th>Ángulo</th>
+              <th>Estado</th>
+              <th id="thActions" class="only-manage">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="lotBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REGISTRAR BIOLOGICO -->
+<div id="modalBiologico" class="modal hidden">
+  <div class="modal__backdrop" id="modalBiologicoBackdrop"></div>
+
+  <div class="modal__card">
+    <div class="modal__top">
+      <div>
+        <h3 class="modal__title">Registrar biológico</h3>
+        <p class="modal__meta">Completa los datos del lote y asocia una jeringa.</p>
+      </div>
+      <button id="modalBiologicoClose" class="modal__close" type="button">Cerrar</button>
+    </div>
+
+    <form id="formBiologico" class="modal__section">
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Nombre biológico</label>
+          <input id="fNombreBiologico" class="input" placeholder="Ej: BCG, SRP, IPV..." />
+        </div>
+
+        <div class="field">
+          <label>Lote</label>
+          <input id="fLote" class="input" placeholder="Ej: ABC-5544" />
+        </div>
+
+        <div class="field">
+          <label>Caducidad</label>
+          <input id="fCadDate" class="input" type="date" />
+        </div>
+
+        <div class="field">
+          <label>Vía</label>
+          <select id="fVia" class="input">
+            <option value="IM">IM</option>
+            <option value="ID">ID</option>
+            <option value="SC">SC</option>
+            <option value="VO">VO</option>
+          </select>
+          <small class="hint">IM=90°, ID=15°, SC=45°, VO=BOCA</small>
+        </div>
+
+        <div class="field">
+          <label>Dosis por frasco</label>
+          <input id="fDosisPorFrasco" class="input" type="number" step="0.01" min="0.01" value="1" />
+        </div>
+
+        <div class="field">
+          <label>Dosis administrada</label>
+          <input id="fDosisAdministrada" class="input" type="number" step="0.01" min="0.01" value="0.5" />
+        </div>
+
+        <div class="field">
+          <label>Ángulo</label>
+          <input id="fAngulo" class="input" placeholder="Se completa automáticamente según vía" />
+        </div>
+
+        <div class="field">
+          <label>Descripción</label>
+          <input id="fDesc" class="input" placeholder="Sitio, rango de edad, etc." />
+        </div>
+
+        <div class="field">
+          <label>Cajas</label>
+          <input id="fCajas" class="input" type="number" min="0" value="0" />
+        </div>
+
+        <div class="field">
+          <label>Frascos por caja</label>
+          <input id="fFrascosPorCaja" class="input" type="number" min="0" value="1" />
+        </div>
+
+        <div class="field">
+          <label>Frascos totales</label>
+          <input id="fFrascosTotales" class="input" type="number" min="0" value="0" />
+          <small class="hint">Se calcula: cajas × frascos/caja</small>
+        </div>
+
+      </div>
+
+      <div class="modal__actions">
+        <button type="button" id="btnCalcFrascos" class="btn-back">Autocalcular frascos</button>
+      </div>
+
+      <hr style="margin:12px 0; border:none; border-top:1px solid #e8e8e8;">
+
+      <div class="modal__section">
+        <h4 class="modal__h4">Asociar jeringa</h4>
+
+        <div class="modal__row">
+          <select id="fJeringaTipo" class="input">
+            <option value="">Seleccione...</option>
+          </select>
+
+          <button type="button" id="btnAddJeringa" class="btn-mini">Agregar</button>
+        </div>
+
+        <div id="selectedJeringasWrap" class="hidden">
+          <p class="hint">Jeringas seleccionadas:</p>
+          <div id="selectedJeringasList" class="chips"></div>
+        </div>
+      </div>
+
+      <p id="formMsg" class="form-msg"></p>
+
+      <div class="modal__actions">
+        <button type="submit" class="btn-back">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Permisos -->
+<script id="biologicos-perms" type="application/json">
+  {{ {"can_manage": (user.rol == "ADMINISTRADOR") } | tojson }}
+</script>
+
+<script src="{{ url_for('static', filename='js/biologicos.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<p>{{ data.footer }}</p>
+<p>{{ data.autor }}</p>
+{% endblock %}

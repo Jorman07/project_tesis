@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_principal.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+</head>
+
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar__header">
+        <h1 class="brand">PRASS_ANALYTICS</h1>
+        <p class="brand__sub">Plataforma inteligente de análisis</p>
+      </div>
+
+      <div class="sidebar__menu">
+        {% include 'partials/menu.html' %}
+      </div>
+
+      <div class="sidebar__footer">
+        <a class="btn-logout" href="{{ url_for('auth.logout') }}">Cerrar sesión</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar__left">
+          <span class="pill">{{ user.rol }}</span>
+          <span class="user-name">{{ user.nombre }}</span>
+          <span class="user-meta">• CI: {{ user.cedula }}</span>
+        </div>
+      </header>
+
+      <section class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div style="display:grid; gap:10px; margin-bottom:12px;">
+          {% for category, msg in messages %}
+          <div style="
+          padding:10px 12px;
+          border-radius:12px;
+          border:1px solid var(--border);
+          background: rgba(255,255,255,0.03);
+          color: var(--text);
+        ">
+            {% if category == 'success' %}
+            <span style="color: var(--brand); font-weight:700;">✔</span>
+            {% else %}
+            <span style="color: var(--danger); font-weight:700;">✖</span>
+            {% endif %}
+            <span style="margin-left:8px;">{{ msg }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block body %}{% endblock %}
+      </section>
+
+      <footer class="footer">
+        {% block footer %}{% endblock %}
+      </footer>
+    </main>
+  </div>
+
+  {% include 'partials/chat_widget.html' %}
+  <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+</body>
+
+</html>

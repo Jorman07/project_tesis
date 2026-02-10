@@ -1,0 +1,163 @@
+{% extends 'layout.html' %}
+{% block title %}Consulta rápida - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/consulta_rapida.css') }}">
+
+<div class="qr-page">
+
+  <div class="qr-head">
+    <div>
+      <h2 class="qr-title">Consulta rápida</h2>
+      <p class="qr-subtitle">
+        Procesa un archivo en memoria. Y Visualiza reportes por mes, alertas resumen y registros paginados.
+      </p>
+    </div>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-controls">
+      <input id="qrFile" type="file" class="uf-input" accept=".xlsx,.xls,.csv" />
+      <button id="qrProcesar" class="btn-back" type="button">Procesar</button>
+      <button id="qrLimpiar" class="btn-back btn-ghost" type="button">Limpiar</button>
+
+      <select id="qrMonthSelect" class="uf-input hidden"></select>
+    </div>
+
+    <p id="qrMsg" class="form-msg"></p>
+  </div>
+
+  <!-- RESULTADOS REPORTES -->
+  <div id="qrOut" class="qr-out hidden">
+
+    <div class="qr-kpis" id="qrKpis"></div>
+
+    <div class="qr-grid">
+
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title">Total por día (dosis)</h4>
+        </div>
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <thead><tr><th>Fecha</th><th class="right">Total</th></tr></thead>
+            <tbody id="qrSerieBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title">Captación por día</h4>
+        </div>
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <thead><tr><th>Fecha</th><th class="right">Temprana</th><th class="right">Tardía</th></tr></thead>
+            <tbody id="qrCapBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title">Dosis por vacuna</h4>
+        </div>
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <thead><tr><th>Vacuna</th><th class="right">Dosis</th></tr></thead>
+            <tbody id="qrDosisBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title">Personas por vacuna</h4>
+        </div>
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <thead><tr><th>Vacuna</th><th class="right">Personas</th></tr></thead>
+            <tbody id="qrPersBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="subcard-head">
+          <h4 class="detail-title">Alertas (resumen)</h4>
+        </div>
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <thead><tr><th>Tipo</th><th>Estado</th><th class="right">Total</th></tr></thead>
+            <tbody id="qrAlertBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- REGISTROS APARTE -->
+  <div id="qrRegsSection" class="qr-regs hidden">
+    <div class="subcard">
+      <div class="subcard-head">
+        <h4 class="detail-title">Registros (paginado)</h4>
+      </div>
+
+      <div class="qr-filters">
+        <select id="fMonth" class="uf-input">
+          <option value="">MES (TODOS)</option>
+        </select>
+
+        <input id="fCedula" class="uf-input" placeholder="Cédula contiene">
+        <input id="fNombre" class="uf-input" placeholder="Nombre contiene">
+        <input id="fFecha" class="uf-input" type="date">
+
+        <select id="fEstado" class="uf-input">
+          <option value="">ESTADO (TODOS)</option>
+          <option value="VALIDO">VALIDO</option>
+          <option value="INVALIDO">INVALIDO</option>
+          <option value="CONFLICTO">CONFLICTO</option>
+        </select>
+
+        <input id="fVacuna" class="uf-input" placeholder="Vacuna (canon)">
+
+        <select id="fCap" class="uf-input">
+          <option value="">CAPTACIÓN (TODOS)</option>
+          <option value="TEMPRANA">TEMPRANA</option>
+          <option value="TARDIA">TARDIA</option>
+        </select>
+
+        <button id="btnBuscarRegs" class="btn-back btn-ghost" type="button">Buscar</button>
+        <button id="btnResetRegs" class="btn-back btn-ghost" type="button">Limpiar</button>
+      </div>
+
+      <div class="rep-table-wrap">
+        <table class="rep-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Cédula - Nombres - Apellidos</th>
+              <th>Vacuna</th>
+              <th class="right">Dosis</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="qrRegsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="qr-pager">
+        <button id="btnPrev" class="btn-back btn-ghost" type="button">←</button>
+        <span id="qrPageInfo" class="qr-pageinfo">—</span>
+        <button id="btnNext" class="btn-back btn-ghost" type="button">→</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/consulta_rapida.js') }}"></script>
+{% endblock %}

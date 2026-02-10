@@ -1,0 +1,633 @@
+/* ============================
+   dashboard.css 
+   ============================ */
+
+.dashboard-page{
+  display: grid;
+  gap: 14px;
+}
+
+/* Header */
+.dash-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dash-title{ margin: 0; }
+
+.dash-subtitle{
+  margin: 6px 0 0 0;
+  opacity: .75;
+  font-size: 12px;
+}
+
+/* Filters */
+.dash-filters{
+  display:flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items:flex-end;
+}
+
+.filter-item{
+  display:grid;
+  gap: 6px;
+  min-width: 220px;
+}
+
+.filter-label{
+  opacity:.75;
+  font-size:12px;
+}
+
+/* Message */
+.form-msg{
+  margin: 0;
+  font-size: 12px;
+  opacity: .85;
+}
+
+/* KPIs */
+.dash-kpis{
+  display:grid;
+  grid-template-columns: repeat(6, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.kpi-card{
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  border-radius: 14px;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before{
+  content:"";
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width: 6px;
+  opacity: .95;
+}
+
+/* Colores KPIs (sin tocar HTML) */
+.dash-kpis .kpi-card:nth-child(1)::before{ background: #3b82f6; }
+.dash-kpis .kpi-card:nth-child(2)::before{ background: #22c55e; }
+.dash-kpis .kpi-card:nth-child(3)::before{ background: #f59e0b; }
+.dash-kpis .kpi-card:nth-child(4)::before{ background: #a855f7; }
+.dash-kpis .kpi-card:nth-child(5)::before{ background: #ef4444; }
+.dash-kpis .kpi-card:nth-child(6)::before{ background: #06b6d4; }
+
+.kpi-label{
+  font-size: 12px;
+  opacity: .75;
+}
+
+.kpi-value{
+  font-size: 22px;
+  font-weight: 900;
+  margin-top: 6px;
+  letter-spacing: .2px;
+}
+
+.kpi-sub{
+  font-size: 12px;
+  opacity: .7;
+  margin-top: 4px;
+}
+
+/* ============================
+   GRIDS (clave: stretch)
+   ============================ */
+
+.dash-grid,
+.dash-grid2,
+.dash-grid3{
+  display:grid;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.dash-grid{
+  grid-template-columns: 1.2fr .8fr;
+}
+
+.dash-grid2{
+  grid-template-columns: 1fr 1fr;
+}
+
+.dash-grid3{
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* ============================
+   STACK (para apilar tarjetas)
+   ============================ */
+
+.dash-stack{
+  display:flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* ============================
+   Cards
+   ============================ */
+
+.dash-card{
+  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  overflow: hidden;
+  min-height: 430px;
+
+  /* Sombra suave para que no “se pegue” visualmente */
+  box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+}
+
+/* fila 2 más “grande” (opcional) */
+.dash-card-big{
+  min-height: 520px;
+}
+
+.dash-card-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  min-height: 54px;
+}
+
+.dash-card-title{
+  margin: 0;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.dash-card-sub{
+  margin: 2px 0 0 0;
+  opacity: .7;
+  font-size: 12px;
+}
+
+/* ============================
+   Plot containers (NO FIJOS)
+   ============================ */
+
+.plot{
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 320px;
+  height: auto;
+}
+
+.plot-tall{
+  min-height: 420px;
+}
+
+.js-plotly-plot .modebar-container{
+  top: 6px !important;
+  right: 6px !important;
+}
+
+/* ============================
+   Ajuste específico FILA 1
+   ============================ */
+
+.dash-row1{
+  gap: 18px;          /* aire entre las 2 columnas */
+  padding-top: 4px;
+}
+
+.dash-row1-stack{
+  gap: 18px;          /* aire entre tarjetas apiladas */
+}
+
+/* Las tarjetas de la fila 1 deben verse “cuadradas” */
+.dash-row1 .dash-card{
+  min-height: 340px;
+}
+
+.dash-row1 .plot{
+  min-height: 240px;
+}
+
+.dash-row1 .plot-tall{
+  min-height: 260px;
+}
+
+/* ============================
+   Inputs / Buttons
+   ============================ */
+
+.uf-input{
+  background: rgba(255,255,255,0.03);
+  color: var(--text, #e6eefc);
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  border-radius: 10px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+.uf-input:focus{
+  border-color: rgba(26,92,255,0.9);
+  box-shadow: 0 0 0 3px rgba(26,92,255,0.18);
+}
+
+.btn-mini{
+  background: rgba(26,92,255,0.95);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.btn-mini:hover{ filter: brightness(1.05); }
+
+/* ============================
+   KPIs internos dentro de una dash-card
+   ============================ */
+
+.dash-mini-kpis{
+  display:flex;
+  gap:12px;
+  padding: 10px 12px 0 12px;
+  flex-wrap: wrap;
+}
+
+.mini-kpi{
+  flex:1 1 220px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* mini colorbar */
+.mini-kpi::before{
+  content:"";
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width: 5px;
+  opacity: .9;
+  background: #06b6d4;
+}
+
+.mini-kpi-label{
+  font-size: 12px;
+  opacity: .85;
+  margin-bottom: 6px;
+}
+
+.mini-kpi-value{
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.mini-kpi-sub{
+  font-size: 12px;
+  opacity: .75;
+  margin-top: 4px;
+}
+
+/* ============================
+   Responsive
+   ============================ */
+
+@media (max-width: 1200px){
+  .dash-kpis{
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+  .dash-grid{
+    grid-template-columns: 1fr;
+  }
+  .dash-grid2{
+    grid-template-columns: 1fr;
+  }
+  .dash-grid3{
+    grid-template-columns: 1fr;
+  }
+  .filter-item{
+    min-width: 180px;
+  }
+
+  .dash-card{
+    min-height: 420px;
+  }
+
+  .dash-card-big{
+    min-height: 480px;
+  }
+
+  .dash-row1{
+    gap: 14px;
+  }
+  .dash-row1-stack{
+    gap: 14px;
+  }
+}
+
+/* Evita recortes visuales dentro del gráfico (Plotly) */
+.plot{
+  padding: 8px;              /* aire extra alrededor del canvas */
+  box-sizing: border-box;
+}
+
+/* Por si algún contenedor interno de Plotly se sale */
+.plot .js-plotly-plot{
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================
+   Recomendaciones (tabla)
+   ============================ */
+.rec-table-wrap{
+  width: 100%;
+  overflow: auto;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+}
+
+.rec-table{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.rec-table th,
+.rec-table td{
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.rec-table th{
+  text-align: left;
+  opacity: .85;
+  background: rgba(255,255,255,0.03);
+}
+
+.rec-muted{
+  opacity: .65;
+  padding: 14px;
+}
+
+/* badges riesgo */
+.risk{
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 11px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.risk-high{ background: rgba(239,68,68,0.18); color: #ffb4b4; }
+.risk-med{  background: rgba(245,158,11,0.18); color: #ffd39a; }
+.risk-low{  background: rgba(34,197,94,0.16);  color: #b7f7cc; }
+
+/* ============================
+   DETALLE LOTES (TARJETA DERECHA)
+   - NO crecer: scroll interno
+   - Scroll horizontal discreto + vertical discreto
+   ============================ */
+
+/* IMPORTANTE:
+   - Esto evita que la card derecha se “estire”
+   - Deja el contenido (tabla/lista) scrolleable dentro
+*/
+#lotDetail.lot-detail,
+.lot-detail{
+  width: 100%;
+  padding: 12px;          /* igual que dash-card */
+  min-height: 430px;      /* coherente con dash-card */
+  max-height: calc(100vh - 160px); /* evita extenderse (ajusta si tu header es más alto) */
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.03);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+
+  overflow: auto;         /* vertical + horizontal si hace falta */
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+/* Estado vacío */
+.lot-detail.is-empty{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+
+.lot-empty{
+  text-align: center;
+  opacity: .85;
+  padding: 18px;
+  border: 1px dashed rgba(255,255,255,0.18);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
+  background: rgba(255,255,255,0.02);
+}
+
+.lot-empty-title{
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.lot-empty-sub{
+  opacity: .75;
+  font-size: 12px;
+}
+
+.lot-title{
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+/* Tabla lotes */
+.lot-table{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.012);
+  overflow: hidden;
+}
+
+.lot-table th,
+.lot-table td{
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.lot-table th{
+  text-align: left;
+  opacity: .85;
+  background: rgba(255,255,255,0.03);
+}
+
+/* ============================
+   SCROLLBARS (DISCRETOS / TEMA OSCURO)
+   - Aplica a: panel derecho + tablas con overflow
+   ============================ */
+
+/* Firefox */
+.lot-detail,
+.rec-table-wrap{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34,197,94,0.55) rgba(255,255,255,0.06);
+}
+
+/* WebKit (Chrome/Edge) */
+.lot-detail::-webkit-scrollbar,
+.rec-table-wrap::-webkit-scrollbar{
+  width: 8px;   /* vertical */
+  height: 8px;  /* horizontal (discreto) */
+}
+
+.lot-detail::-webkit-scrollbar-track,
+.rec-table-wrap::-webkit-scrollbar-track{
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+}
+
+.lot-detail::-webkit-scrollbar-thumb,
+.rec-table-wrap::-webkit-scrollbar-thumb{
+  background: rgba(34,197,94,0.55); /* verde discreto */
+  border-radius: 999px;
+  border: 2px solid rgba(15,23,42,0.55); /* “se integra” al fondo */
+}
+
+.lot-detail::-webkit-scrollbar-thumb:hover,
+.rec-table-wrap::-webkit-scrollbar-thumb:hover{
+  background: rgba(34,197,94,0.75);
+}
+
+/* Para que el horizontal no se vea “grueso” */
+.lot-detail::-webkit-scrollbar:horizontal,
+.rec-table-wrap::-webkit-scrollbar:horizontal{
+  height: 7px;
+}
+
+/* ============================
+   RECOMENDACIONES + DETALLE (PRO)
+   ============================ */
+
+.dash-grid2 .dash-card{
+  backdrop-filter: blur(2px);
+}
+
+.rec-table-wrap{
+  background: rgba(255,255,255,0.015);
+}
+
+.rec-table{
+  min-width: 0;           /* evita overflow innecesario */
+}
+
+.rec-table thead th{
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(20,30,45,0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.rec-table tbody tr:nth-child(even){
+  background: rgba(255,255,255,0.02);
+}
+
+.rec-row{
+  cursor: pointer;
+}
+
+.rec-row:hover{
+  background: rgba(59,130,246,0.06);
+}
+
+.rec-row:active{
+  background: rgba(59,130,246,0.10);
+}
+
+.rec-row:focus-within{
+  outline: 2px solid rgba(59,130,246,0.25);
+  outline-offset: -2px;
+}
+
+.risk{
+  letter-spacing: .2px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+/* Radar */
+#pltRiskRadar{
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.015);
+  padding: 6px;
+}
+
+/* Tabla → apariencia “lista” */
+.rec-table tbody tr{
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.rec-table tbody td{
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* Fila full width */
+.dash-grid-full{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* Radar: no gigante */
+.plot-radar{
+  flex: 0 0 auto;
+  min-height: 420px;
+  height: 420px;
+}
+
+/* Tarjeta ancha */
+.dash-card-wide{
+  min-height: 520px;
+}
+
+/* Mantén el select en tema oscuro cuando el navegador lo soporte */
+select.uf-input{
+  color-scheme: dark;
+}
+
+/* Intento de colorear el desplegable (depende del SO/navegador) */
+select.uf-input option,
+select.uf-input optgroup{
+  background-color: #0b1220;
+  color: #e6eefc;
+}

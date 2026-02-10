@@ -1,0 +1,130 @@
+@import url("./usuarios.css");
+
+.form-msg{
+  margin-top:10px;
+  min-height:18px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.registros-page{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.table-wrap.reg-limit{
+  max-height: 450px;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+
+.table-wrap.reg-limit thead th{
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--panel2);
+  border-bottom: 1px solid var(--border);
+}
+
+.pager{
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.btn-back{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:600;
+}
+.btn-back:hover{
+  border-color: var(--brand);
+  background: rgba(34,197,94,0.08);
+}
+.btn-back:disabled{
+  opacity:0.55;
+  cursor:not-allowed;
+}
+
+/* paciente */
+.patient-section{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+}
+.patient-title{ margin:0; font-size:16px; font-weight:800; }
+.patient-sub{ margin:6px 0 0; color:var(--muted); font-size:13px; }
+.patient-search{
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.detail-card{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255, 255, 255, 0.03);
+  padding:14px;
+  margin-top:12px;
+}
+.detail-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.detail-title{ margin:0; font-size:14px; }
+.detail-summary{
+  color:var(--muted);
+  font-size:13px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.patient-fields{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.patient-fields .pf{
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(214, 15, 15, 0.03);
+  padding:10px;
+  font-size:13px;
+}
+.patient-fields .k{ color:var(--muted); font-weight:700; margin-right:6px; }
+
+.vaccines-grid{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap:12px;
+}
+
+.vcard{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255, 255, 255, 0.03);
+  padding:12px;
+}
+.vcard .vtitle{ margin:0 0 8px; font-weight:800; }
+.vcard .vmeta{ color:var(--muted); font-size:12px; margin-bottom:10px; }
+.vcard .vlist{ margin:0; padding-left:18px; color:var(--muted); font-size:13px; }
+
+@media (max-width: 900px){
+  .patient-fields{ grid-template-columns: 1fr; }
+}

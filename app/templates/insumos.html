@@ -1,0 +1,285 @@
+{% extends 'layout.html' %}
+{% block title %}Insumos - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/insumos.css') }}">
+
+<div class="card insumos-page">
+
+  <!-- HEADER -->
+  <div class="insumos-header">
+    <div>
+      <h2 class="insumos-title" id="pageTitle">Gestión de Insumos</h2>
+      <p class="insumos-sub" id="pageSub">Seleccione una categoría para ver los tipos disponibles.</p>
+    </div>
+
+    <div class="insumos-head-actions">
+      <button id="btnBack" class="btn-back hidden" type="button">← Regresar</button>
+      <button id="btnRegistrar" class="btn-back hidden only-manage" type="button">+ Registrar insumo</button>
+    </div>
+  </div>
+
+  <!-- Vista Categorías -->
+  <div id="categoriesView">
+    <div class="category-grid" id="catContainer"></div>
+  </div>
+
+  <!-- Vista Tipos -->
+  <div id="typesView" class="hidden">
+    <div class="types-toolbar">
+      <input id="qTipo" class="input" placeholder="Buscar tipo..." />
+    </div>
+    <div class="types-grid" id="typesContainer"></div>
+  </div>
+
+  <!-- Detalle -->
+  <div id="detailSection" class="hidden">
+    <div class="detail-card">
+      <div class="detail-head">
+        <h3 class="detail-title" id="detailTitle">Detalle</h3>
+        <div class="detail-summary" id="detailSummary"></div>
+      </div>
+
+      <div id="vaccinesBlock" class="hidden">
+        <h4 class="section-title">Vacunas asociadas</h4>
+        <ul class="vac-list" id="vacList"></ul>
+      </div>
+
+      <h4 class="section-title">Inventario por lote</h4>
+
+      <!-- Filtros SOLO para lotes -->
+      <div class="detail-filters">
+        <input id="fLote" class="input" placeholder="Buscar lote..." />
+
+        <select id="fEstadoLote" class="input">
+          <option value="">Estado: Todos</option>
+          <option value="true">Activos</option>
+          <option value="false">Inactivos</option>
+        </select>
+
+        <select id="fExpLote" class="input">
+          <option value="">Caducidad: Todas</option>
+          <option value="30">≤ 30 días</option>
+          <option value="90">≤ 90 días</option>
+          <option value="180">≤ 180 días</option>
+        </select>
+
+        <div class="date-group">
+          <div class="date-label">Fabricación</div>
+          <div class="date-row">
+            <div class="date-field">
+              <span>Desde</span>
+              <input id="fFabFrom" class="input" type="date" />
+            </div>
+            <div class="date-field">
+              <span>Hasta</span>
+              <input id="fFabTo" class="input" type="date" />
+            </div>
+            <div class="date-field">
+              <span>Exacta</span>
+              <input id="fFabExact" class="input" type="date" />
+            </div>
+          </div>
+        </div>
+
+        <div class="date-group">
+          <div class="date-label">Caducidad</div>
+          <div class="date-row">
+            <div class="date-field">
+              <span>Desde</span>
+              <input id="fCadFrom" class="input" type="date" />
+            </div>
+            <div class="date-field">
+              <span>Hasta</span>
+              <input id="fCadTo" class="input" type="date" />
+            </div>
+            <div class="date-field">
+              <span>Exacta</span>
+              <input id="fCadExact" class="input" type="date" />
+            </div>
+          </div>
+        </div>
+
+
+        <button id="btnClearDetail" class="btn-clear" type="button">Limpiar</button>
+
+
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Lote</th>
+              <th>Fabricación</th>
+              <th>Caducidad</th>
+              <th class="right">Packs</th>
+              <th class="right">Unidades</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+
+            </tr>
+          </thead>
+          <tbody id="lotBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL EDITAR LOTE -->
+<div id="modalEditLote" class="modal hidden">
+  <div class="modal__backdrop" id="modalEditLoteBackdrop"></div>
+
+  <div class="modal__card">
+    <div class="modal__top">
+      <div>
+        <h3 class="modal__title">Editar lote</h3>
+        <p class="modal__meta" id="editInfo"></p>
+      </div>
+      <button id="modalEditLoteClose" class="modal__close" type="button">Cerrar</button>
+    </div>
+
+    <form id="formEditLote" class="modal__section">
+      <div class="form-grid">
+        <div class="field">
+          <label>Lote (solo lectura)</label>
+          <input id="eLote" class="input" readonly>
+        </div>
+
+        <div class="field">
+          <label>Packs</label>
+          <input id="ePacks" class="input" type="number" min="0" required>
+        </div>
+
+        <div class="field">
+          <label>Fabricación (mes-año)</label>
+          <input id="eFabMonth" class="input" type="month">
+        </div>
+
+        <div class="field">
+          <label>Caducidad (mes-año)</label>
+          <input id="eCadMonth" class="input" type="month" required>
+        </div>
+      </div>
+
+      <div class="modal__actions">
+        <button type="button" id="btnEditCancel" class="btn-back">Cancelar</button>
+        <button type="submit" class="btn-back">Guardar cambios</button>
+      </div>
+
+      <p id="editMsg" class="form-msg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL REGISTRAR INSUMO -->
+<div id="modalInsumo" class="modal hidden">
+  <div class="modal__backdrop" id="modalInsumoBackdrop"></div>
+
+  <div class="modal__card">
+    <div class="modal__top">
+      <div>
+        <h3 class="modal__title">Registrar insumo</h3>
+        <p class="modal__meta">Completa los datos del lote. Si ya seleccionaste categoría/tipo, se autocompletan.</p>
+      </div>
+      <button id="modalInsumoClose" class="modal__close" type="button">Cerrar</button>
+    </div>
+
+    <form id="formInsumo" class="modal__section">
+      <div class="form-grid">
+        <div class="field">
+          <label>Categoría</label>
+          <select id="fCat" class="input">
+            <option value="">Seleccione...</option>
+            <option value="JERINGAS">JERINGAS</option>
+            <option value="GUANTES">GUANTES</option>
+            <option value="ALCOHOL">ALCOHOL</option>
+            <option value="ALGODON">ALGODON</option>
+            <option value="OTRO">OTRO</option>
+          </select>
+        </div>
+
+         <div class="field hidden" id="newCatBlock">
+            <label>Nueva categoría</label>
+            <input id="fNewCat" class="input" placeholder="Ej: MASCARILLAS" />
+            <small class="hint">Se guardará en MAYÚSCULAS.</small>
+          </div>
+
+
+        <div class="field">
+          <label>Nombre tipo</label>
+          <input id="fTipo" class="input" placeholder='Nombre del tipo' />
+          <small class="hint" id="hintTipo"></small>
+        </div>
+
+        <div class="field hidden" id="alcoholCapBlock">
+          <label>Capacidad por botella</label>
+          <select id="fAlcoholCap" class="input">
+            <option value="250">250 ml</option>
+            <option value="500">500 ml</option>
+            <option value="1000" selected>1000 ml (1L)</option>
+            <option value="3785">Galón (3785 ml)</option>
+          </select>
+          <small class="hint">Se calcularán unidades en mililitros según botellas.</small>
+        </div>
+
+
+        <div class="field">
+          <label>Lote</label>
+          <input id="fLoteReg" class="input" placeholder="Ej: IL-4478" />
+        </div>
+
+        <div class="field">
+          <label id="lblPacks">Packs</label>
+          <input id="fPacks" class="input" type="number" min="0" value="0" />
+          <small class="hint" id="hintPacks"></small>
+        </div>
+
+
+        <div class="field">
+          <label>Unidades (base)</label>
+          <input id="fUnidades" class="input" type="number" min="0" step="0.01" value="0" />
+        </div>
+
+        <div class="field">
+          <label>Fabricación (mes-año)</label>
+          <input id="fFabMonth" class="input" type="month" />
+          <small class="hint">Se guardará como primer día del mes.</small>
+        </div>
+
+        <div class="field">
+          <label>Caducidad (mes-año)</label>
+          <input id="fCadMonth" class="input" type="month" />
+          <small class="hint">Se guardará como último día del mes.</small>
+        </div>
+
+      </div>
+
+      <p id="formMsg" class="form-msg"></p>
+
+
+      <div class="modal__actions">
+        <button type="button" id="btnCalc" class="btn-back">Autocalcular Unidades</button>
+        <button type="submit" class="btn-back">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Permisos desde backend sin errores del editor -->
+<script id="insumos-perms" type="application/json">
+  {{ {"can_manage": (user.rol == "ADMINISTRADOR") } | tojson }}
+</script>
+
+
+<script src="{{ url_for('static', filename='js/insumos.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<p>{{ data.footer }}</p>
+<p>{{ data.autor }}</p>
+{% endblock %}

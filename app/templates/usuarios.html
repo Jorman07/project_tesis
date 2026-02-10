@@ -1,0 +1,158 @@
+{% extends 'layout.html' %}
+{% block title %}Usuarios - PRASS_ANALYTICS{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/usuarios.css') }}">
+
+<div class="card users-page">
+
+  <div class="users-head">
+    <div>
+      <h2 class="users-title">Usuarios</h2>
+      <p class="users-subtitle">Panel de control y administración de usuarios.</p>
+    </div>
+  </div>
+
+  <div class="users-filters">
+    <div class="users-filters">
+      <a class="btn-create" href="{{ url_for('auth.register_view', next=url_for('main.usuarios')) }}">
+        + Crear usuario
+      </a>
+
+      <input id="filterCedula" class="uf-input" placeholder="Buscar por cédula...">
+      <input id="filterNombre" class="uf-input" placeholder="Buscar por nombre...">
+      
+      <select id="filterRol" class="uf-input">
+        <option value="">Rol: Todos</option>
+        <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+        <option value="COORDINADOR">COORDINADOR</option>
+        <option value="ASISTENTE">ASISTENTE</option>
+      </select>
+
+      <select id="filterEstado" class="uf-input">
+        <option value="">Estado: Todos</option>
+        <option value="true">ACTIVO</option>
+        <option value="false">INACTIVO</option>
+      </select>
+
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="usersTable" class="ut">
+      <thead>
+        <tr>
+          <th>Cédula</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for u in users %}
+        <tr class="urow" data-id="{{ u.id_usuario }}" data-cedula="{{ u.cedula|lower }}"
+          data-fullname="{{ (u.nombres ~ ' ' ~ u.apellidos)|lower }}" data-rol="{{ u.rol }}"
+          data-estado="{{ 'true' if u.estado else 'false' }}"
+          data-self="{{ 'true' if (u.id_usuario|string) == (user.id|string) else 'false' }}">
+          <td class="cedula">{{ u.cedula }}</td>
+          <td class="nombre">{{ u.nombres }}</td>
+          <td class="apellido">{{ u.apellidos }}</td>
+          <td><span class="pill">{{ u.rol }}</span></td>
+          <td>
+            {% if u.estado %}
+            <span class="pill pill-ok">ACTIVO</span>
+            {% else %}
+            <span class="pill pill-bad">INACTIVO</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="actions">
+              <button class="btn-mini" type="button" data-action="edit">Editar</button>
+
+              {% if (u.id_usuario|string) == (user.id|string) %}
+              <button class="btn-mini danger" type="button" disabled title="No puedes cambiar tu propio estado">
+                Bloqueado
+              </button>
+              {% else %}
+              <form action="{{ url_for('main.usuarios_update_estado') }}" method="POST" class="form-inline">
+                <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
+                <input type="hidden" name="estado" value="{{ 'false' if u.estado else 'true' }}">
+                {% if u.estado %}
+                <button class="btn-mini danger" type="submit">Desactivar</button>
+                {% else %}
+                <button class="btn-mini" type="submit">Activar</button>
+                {% endif %}
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+
+        {% if users|length == 0 %}
+        <tr>
+          <td colspan="6" class="empty-row">
+            No hay usuarios registrados.
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="editModal" class="modal hidden">
+  <div id="modalBackdrop" class="modal__backdrop"></div>
+
+  <div class="modal__card">
+    <div class="modal__top">
+      <div>
+        <h3 class="modal__title">Editar usuario</h3>
+        <p class="modal__meta">
+          CI: <b id="m_cedula"></b> • <span id="m_nombre"></span>
+          <span id="m_self_badge" class="pill pill-warn hidden">TU USUARIO</span>
+        </p>
+      </div>
+      <button id="modalClose" class="modal__close" type="button">Cerrar</button>
+    </div>
+
+    <div class="modal__section">
+      <h4 class="modal__h4">Cambiar rol</h4>
+      <form action="{{ url_for('main.usuarios_update_rol') }}" method="POST" class="modal__row">
+        <input type="hidden" id="m_id_usuario" name="id_usuario" value="">
+        <select id="m_rol" name="rol" required class="select-dark">
+          <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+          <option value="COORDINADOR">COORDINADOR</option>
+          <option value="ASISTENTE">ASISTENTE</option>
+        </select>
+        <button id="btnSaveRol" class="btn-mini" type="submit">Guardar rol</button>
+      </form>
+      <p id="selfRoleMsg" class="hint hidden">
+        No puedes cambiar tu propio rol de ADMINISTRADOR.
+      </p>
+    </div>
+
+    <div class="modal__section">
+      <h4 class="modal__h4">Restablecer contraseña</h4>
+      <form action="{{ url_for('main.usuarios_reset_password') }}" method="POST" class="modal__row">
+        <input type="hidden" name="id_usuario" id="m_id_usuario_pw" value="">
+        <input id="m_new_password" name="new_password" type="password" placeholder="Nueva contraseña" required
+          class="input-dark">
+        <button class="btn-mini danger" type="submit">Reset</button>
+      </form>
+      <p class="hint">La contraseña no se muestra. Solo se reemplaza por la nueva.</p>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/usuarios.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<p>{{ data.footer }}</p>
+<p>{{ data.autor }}</p>
+{% endblock %}

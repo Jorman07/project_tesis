@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>PRASS_ANALYTICS | Login</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_principal.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+
+<body>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+
+      <h1 class="brand">PRASS_ANALYTICS</h1>
+      <p class="subtitle">Plataforma inteligente de análisis de datos</p>
+
+      <form id="loginForm">
+        <div class="input-group">
+          <input type="text" id="username" required>
+          <label>Usuario</label>
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="password" required>
+          <label>Contraseña</label>
+        </div>
+
+        <button type="submit" class="btn primary">
+          Iniciar sesión
+        </button>
+      </form>
+
+      <div class="divider">
+        <span>o</span>
+      </div>
+
+      <a href="{{ url_for('auth.register_view') }}" class="btn secondary full">
+        Registrarse
+      </a>
+
+      <p id="loginError" class="error"></p>
+
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+
+</html>
