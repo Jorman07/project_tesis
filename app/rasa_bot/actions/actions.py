@@ -11,6 +11,8 @@ from rasa_sdk.events import SlotSet
 FLASK_BOT_BASE_URL = os.getenv("FLASK_BOT_BASE_URL", "")
 BOT_KEY = os.getenv("BOT_KEY", "")
 
+print("FLASK_BOT_BASE_URL:", FLASK_BOT_BASE_URL)
+print("BOT_KEY cargada en actions:", bool(BOT_KEY))
 # ------------------------- helpers base -------------------------
 
 def _headers():
