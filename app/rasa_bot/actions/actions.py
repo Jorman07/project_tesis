@@ -196,36 +196,66 @@ class ActionReporteMensual(Action):
         return "action_reporte_mensual"
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
+        print("[ARM] inicio")
         text = tracker.latest_message.get("text") or ""
-        # turno actual primero
+
         periodo_ent = latest_entity(tracker, "periodo")
         month = norm_month(periodo_ent) if periodo_ent else None
         if not month:
             month = norm_month(text)
 
+        print(f"[ARM] month={month}")
+
         if not month:
-            dispatcher.utter_message("Indícame el mes como **YYYY-MM** o **“diciembre 2025”**. Ej: “reporte 2025-12”.")
+            print("[ARM] sin month")
+            dispatcher.utter_message("Indícame el mes como YYYY-MM o diciembre 2025.")
+            print("[ARM] fin sin month")
             return []
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/reporte-mensual"
-        r = requests.get(url, params={"month": month}, headers=_headers(), timeout=20)
+        try:
+            print("[ARM] antes request Flask")
+            url = f"{FLASK_BOT_BASE_URL}/api/bot/reporte-mensual"
+            r = requests.get(url, params={"month": month}, headers=_headers(), timeout=8)
+            print(f"[ARM] status={r.status_code}")
+        except Exception as e:
+            print(f"[ARM] error request={e}")
+            dispatcher.utter_message("No pude consultar el reporte en este momento.")
+            print("[ARM] fin con error request")
+            return []
+
         if r.status_code != 200:
+            print(f"[ARM] body_error={r.text[:500]}")
             dispatcher.utter_message("No pude obtener el reporte mensual en este momento.")
+            print("[ARM] fin status != 200")
             return []
 
-        data = (r.json() or {}).get("data") or {}
-        total = data.get("total_mensual", 0)
-        top = data.get("dosis_por_vacuna") or []
+        try:
+            print("[ARM] antes json")
+            data = (r.json() or {}).get("data") or {}
+            print("[ARM] json ok")
 
-        lines = [f"**Resumen mensual — {month}**", "", f"• Total de dosis registradas: **{total}**"]
-        if isinstance(top, list) and top:
-            lines.append("")
-            lines.append("**Vacunas con mayor aplicación**")
-            for i, it in enumerate(top[:3], start=1):
-                lines.append(f"{i}. {it.get('vacuna','N/D')}: **{it.get('dosis_total',0)}**")
+            total = data.get("total_mensual", 0)
+            top = data.get("dosis_por_vacuna") or []
+            print(f"[ARM] total={total} top_len={len(top) if isinstance(top, list) else 'no-list'}")
 
-        dispatcher.utter_message("\n".join(lines))
-        return [SlotSet("last_periodo", month)]
+            lines = [f"**Resumen mensual — {month}**", "", f"• Total de dosis registradas: **{total}**"]
+
+            if isinstance(top, list) and top:
+                lines.append("")
+                lines.append("**Vacunas con mayor aplicación**")
+                for i, it in enumerate(top[:3], start=1):
+                    lines.append(f"{i}. {it.get('vacuna','N/D')}: **{it.get('dosis_total',0)}**")
+
+            print("[ARM] antes utter")
+            dispatcher.utter_message("\n".join(lines))
+            print("[ARM] despues utter")
+            return [SlotSet("last_periodo", month)]
+
+        except Exception as e:
+            print(f"[ARM] error post_json={e}")
+            dispatcher.utter_message("Hubo un problema al construir la respuesta.")
+            print("[ARM] fin con error post_json")
+            return []
 
 
 class ActionPacienteHistorial(Action):
