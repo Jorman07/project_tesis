@@ -81,217 +81,549 @@
   </div>
 
   <!-- =========================
+       MENÚ HORIZONTAL (NUEVO)
+       - No afecta IDs/clases existentes
+  ========================== -->
+  <div id="menuSecciones" class="dash-tabs" role="tablist" aria-label="Secciones del dashboard">
+    <button class="tab-btn is-active" type="button" data-tab="panorama" aria-selected="true">Panorama</button>
+    <button class="tab-btn" type="button" data-tab="prediccion" aria-selected="false">Predicción</button>
+    <button class="tab-btn" type="button" data-tab="comparativos" aria-selected="false">Comparativos</button>
+    <button class="tab-btn" type="button" data-tab="anual" aria-selected="false">Anual</button>
+  </div>
+
+  <!-- =========================
+     SECCIÓN: PANORAMA (DEFAULT)
+     Contiene lo operativo actual (sin predicciones)
+========================== -->
+  <section id="secPanorama" class="seccion-dash" data-sec="panorama">
+
+    <!-- =========================
        FILA 1 (2 columnas apiladas)
        Izq: Tendencia + Calidad
        Der: Dosis por día + Top vacunas
-  ========================== -->
-  <div class="dash-grid2 dash-row1">
+  ========================= -->
+    <div class="dash-grid2 dash-row1">
 
-    <div class="dash-stack dash-row1-stack">
-      <div class="card dash-card">
-        <div class="dash-card-head">
-          <h3 class="dash-card-title">Tendencia mensual</h3>
-          <p class="dash-card-sub">Últimos meses. Filtra por mes</p>
+      <div class="dash-stack dash-row1-stack">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tPanMensual" data-title-base="Tendencia de dosis mensual hasta">Tendencia de dosis mensual</h3>
+            <p class="dash-card-sub">Últimos meses procesados</p>
+          </div>
+          <div id="pltMensual" class="plot plot-tall"></div>
         </div>
-        <div id="pltMensual" class="plot plot-tall"></div>
+
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tPanCalidad" data-title-base="Estado de Registros del periodo">Estado de
+              Registros del periodo</h3>
+          </div>
+          <div id="pltCalidad" class="plot"></div>
+        </div>
       </div>
 
-      <div class="card dash-card">
-        <div class="dash-card-head">
-          <h3 class="dash-card-title">Estado de Registros del periodo</h3>
+      <div class="dash-stack dash-row1-stack">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tPanDiario" data-title-base="Distribución de dosis por día">Distribución de dosis por día</h3>
+          </div>
+          <div id="pltDiario" class="plot"></div>
         </div>
-        <div id="pltCalidad" class="plot"></div>
+
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tPanTopVacunas" data-title-base="Vacunas con mayor aplicación durante el mes">Vacunas con mayor aplicación durante el mes</h3>
+            <p class="dash-card-sub">Cantidad de dosis aplicadas por vacuna</p>
+          </div>
+          <div id="pltVacunas" class="plot plot-tall"></div>
+        </div>
       </div>
+
     </div>
 
-    <div class="dash-stack dash-row1-stack">
-      <div class="card dash-card">
-        <div class="dash-card-head">
-          <h3 class="dash-card-title">Dosis totales por día del periodo</h3>
-        </div>
-        <div id="pltDiario" class="plot"></div>
-      </div>
-
-      <div class="card dash-card">
-        <div class="dash-card-head">
-          <h3 class="dash-card-title">Top Vacunas durante el periodo</h3>
-          <p class="dash-card-sub">Filtra por Vacuna / Biológico.</p>
-        </div>
-        <div id="pltVacunas" class="plot plot-tall"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- =========================
+    <!-- =========================
        FILA 2 (2 columnas grandes)
        Jeringas por tipo | Insumos estimados
-  ========================== -->
-  <div class="dash-grid2 dash-row2">
+  ========================= -->
+    <div class="dash-grid2 dash-row2">
 
-    <div class="card dash-card dash-card-big">
-      <div class="dash-card-head">
-        <h3 class="dash-card-title">Cantidad de Jeringas por tipo usados</h3>
-        <p class="dash-card-sub">Distribución según vacunas del periodo</p>
-      </div>
-      <div id="pltJeringasPie" class="plot"></div>
-    </div>
-
-    <div class="card dash-card dash-card-big">
-      <div class="dash-card-head">
-        <h3 class="dash-card-title">Insumos usados diarios</h3>
-        <p class="dash-card-sub">Jeringas por dosis, guantes por personas. Alcohol y algodón estimados.</p>
+      <div class="card dash-card dash-card-big">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title" id="tPanJeringasPie" data-title-base="Distribución de jeringas por tipo usados">
+            Distribución de jeringas por tipo usados</h3>
+          <p class="dash-card-sub">Distribución según vacunas aplicadas</p>
+        </div>
+        <div id="pltJeringasPie" class="plot"></div>
       </div>
 
-      <div class="dash-mini-kpis">
-        <div class="mini-kpi">
-          <div class="mini-kpi-label">Alcohol (ml)</div>
-          <div id="kpiAlcoholMlIn" class="mini-kpi-value">—</div>
-          <div id="kpiAlcoholSubIn" class="mini-kpi-sub">—</div>
+      <div class="card dash-card dash-card-big">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title" id="tPanInsumosEstimados" data-title-base="Insumos diarios usados">Insumos diarios usados</h3>
+          <!--<p class="dash-card-sub">Jeringas por dosis, guantes por personas. Alcohol y algodón estimados.</p>-->
         </div>
 
-        <div class="mini-kpi">
-          <div class="mini-kpi-label">Algodón (rollos)</div>
-          <div id="kpiAlgodonRollosIn" class="mini-kpi-value">—</div>
-          <div id="kpiAlgodonSubIn" class="mini-kpi-sub">—</div>
+        <div class="dash-mini-kpis">
+          <div class="mini-kpi">
+            <div class="mini-kpi-label">Alcohol (ml)</div>
+            <div id="kpiAlcoholMlIn" class="mini-kpi-value">—</div>
+            <div id="kpiAlcoholSubIn" class="mini-kpi-sub">—</div>
+          </div>
+
+          <div class="mini-kpi">
+            <div class="mini-kpi-label">Algodón (rollos)</div>
+            <div id="kpiAlgodonRollosIn" class="mini-kpi-value">—</div>
+            <div id="kpiAlgodonSubIn" class="mini-kpi-sub">—</div>
+          </div>
         </div>
+
+        <div id="pltInsumosEstimados" class="plot"></div>
       </div>
 
-      <div id="pltInsumosEstimados" class="plot"></div>
     </div>
 
-  </div>
-
-  <!-- =========================
+    <!-- =========================
        FILA 3 (2 columnas)
        FEFO | Brechas territoriales
-  ========================== -->
-  <div class="dash-grid2 dash-row3">
+  ========================= -->
+    <div class="dash-grid2 dash-row3">
 
-    <div class="card dash-card">
-      <div class="dash-card-head">
-        <h3 class="dash-card-title">Inventario FEFO - Lotes de Biológicos por vencer</h3>
-      </div>
-      <div id="pltCaducidad" class="plot"></div>
-    </div>
-
-    <div class="card dash-card">
-      <div class="dash-card-head">
-        <h3 class="dash-card-title">Brechas territoriales</h3>
-        <p class="dash-card-sub">Vulnerabilidad de parroquias sin atender</p>
-      </div>
-      <div id="pltParroquia" class="plot"></div>
-    </div>
-
-  </div>
-
-  <!-- =========================
-       FILA 4 (Predicciones)
-       Izq: Personas + Top Bio (apiladas)
-       Der: Proyección insumos (próx mes)
-  ========================== -->
-  <div class="dash-grid2 dash-row4">
-
-    <div class="dash-stack">
       <div class="card dash-card">
         <div class="dash-card-head">
-          <h3 class="dash-card-title">Predicción Cantidad de Personas a vacunar el próximo mes</h3>
-          <p class="dash-card-sub">Basado en el historial de meses previos al periodo</p>
+          <h3 class="dash-card-title" id="tPanCaducidad"
+            data-title-base="Lotes de Biológicos proximos a vencer">Lotes de Biológicos proximos a vencer</h3>
         </div>
-        <div id="pltPredPeople" class="plot"></div>
+        <div id="pltCaducidad" class="plot"></div>
       </div>
 
       <div class="card dash-card">
         <div class="dash-card-head">
-          <h3 class="dash-card-title">Predicción Top Biológicos para el próximo mes</h3>
-          <p class="dash-card-sub">Basado en el historial de consumo de meses previos al periodo</p>
+          <h3 class="dash-card-title" id="tPanParroquia" data-title-base="Distribución de dosis por parroquia">Distribución de dosis por parroquia</h3>
+          <p class="dash-card-sub">Brecha territorial del mes</p>
         </div>
-        <div id="pltPredBioTop" class="plot"></div>
-      </div>
-    </div>
-
-    <div class="card dash-card">
-      <div class="dash-card-head" style="margin-top:10px;">
-        <h3 class="dash-card-title" style="font-size:14px;">Proyección insumos estimados a utilizar el próximo mes</h3>
-        <p class="dash-card-sub">Escenario futuro basado en el consumo de meses previos a la fecha</p>
+        <div id="pltParroquia" class="plot"></div>
       </div>
 
-      <div id="pltInsumosFcJeringas" class="plot"></div>
-      <div id="pltInsumosFcGuantes" class="plot"></div>
     </div>
 
-  </div>
+  </section>
+
 
   <!-- =========================
-     ACCIONES / RECOMENDACIONES (NUEVO)
-========================== -->
-  <div class="dash-grid2">
+       SECCIÓN: PREDICCIÓN
+       (lazy-load: solo se ejecuta predict aquí)
+  ========================== -->
+  <section id="secPrediccion" class="seccion-dash is-hidden" data-sec="prediccion">
 
-    <div class="card dash-card">
-      <div class="dash-card-head">
-        <h3 class="dash-card-title">Acciones estratégicas de inventario</h3>
-        <p class="dash-card-sub">Riesgo de quiebre y sobre-stock según consumo proyectado</p>
+    <div class="dash-filters dash-filters-pred" id="predFilters">
+      <div class="filter">
+        <label for="selPredPeriodo">Periodo base</label>
+        <select id="selPredPeriodo" class="uf-input"></select>
       </div>
 
-      <div class="dash-mini-kpis">
-        <div class="mini-kpi">
-          <div class="mini-kpi-label">Biológicos riesgo alto</div>
-          <div id="kpiBioRiesgoAlto" class="mini-kpi-value">—</div>
-          <div id="kpiBioRiesgoAltoSub" class="mini-kpi-sub">—</div>
-        </div>
-
-        <div class="mini-kpi">
-          <div class="mini-kpi-label">Insumos riesgo alto</div>
-          <div id="kpiInsRiesgoAlto" class="mini-kpi-value">—</div>
-          <div id="kpiInsRiesgoAltoSub" class="mini-kpi-sub">—</div>
-        </div>
+      <div class="filter">
+        <label for="selPredHorizon">Horizonte a:</label>
+        <select id="selPredHorizon" class="uf-input">
+          <option value="1">1 mes</option>
+          <option value="3">3 meses</option>
+          <option value="6">6 meses</option>
+          <option value="12">12 meses</option>
+        </select>
       </div>
 
-      <div class="rec-table-wrap">
-        <table class="rec-table">
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>Ítem</th>
-              <th>Riesgo de quiebre</th>
-              <th>Riesgo de sobre-stock</th>
-              <th>Pedido sugerido</th>
-            </tr>
-          </thead>
-          <tbody id="tblRecomendaciones">
-            <tr>
-              <td colspan="5" class="rec-muted">—</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Opcional: si quieres un segundo panel, lo dejamos vacío por ahora -->
-    <div id="lotDetail" class="card dash-card lot-detail is-empty">
-      <div class="lot-empty">
-        <div class="lot-empty-title">Sin selección</div>
-        <div class="lot-empty-sub">Haz clic en un ítem de la tabla para ver lotes y riesgos FEFO.</div>
-      </div>
+      <button id="btnPredActualizar" class="btn-mini" type="button">Actualizar</button>
     </div>
 
 
-  </div>
+    <!-- =========================
+         FILA 4 (Predicciones)
+         Izq: Personas + Top Bio (apiladas)
+         Der: Proyección insumos (próx mes)
+    ========================== -->
+    <div class="dash-grid2 dash-row4">
+
+      <div class="dash-stack">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tPredPersonas" data-title-base="Cantidad de Personas a vacunar">Cantidad de
+              Personas a vacunar</h3>
+            <p class="dash-card-sub">Basado en el historial de meses previos</p>
+          </div>
+          <div id="pltPredPeople" class="plot"></div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title">Predicción de dosis de biológicos para el proximo mes</h3>
+            <p class="dash-card-sub">Basado en el historial de consumo de meses previos</p>
+          </div>
+          <div id="pltPredBioTop" class="plot"></div>
+        </div>
+      </div>
+
+      <div class="card dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title" id="tPredInsumos" data-title-base="Proyección insumos estimados a utilizar">
+            Proyección insumos estimados a utilizar</h3>
+          <p class="dash-card-sub">Escenario futuro basado en el consumo de meses previos</p>
+        </div>
+
+        <div id="pltInsumosFcJeringas" class="plot"></div>
+        <div id="pltInsumosFcGuantes" class="plot"></div>
+      </div>
+
+    </div>
+
+    <!-- =========================
+       ACCIONES / RECOMENDACIONES
+    ========================== -->
+    <div class="dash-grid2 dash-row5">
+
+      <div class="card dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Acciones estratégicas de inventario según consumo proyectado</h3>
+          <p class="dash-card-sub">Riesgo de quiebre y sobre-stock</p>
+        </div>
+
+        <div class="dash-mini-kpis">
+          <div class="mini-kpi">
+            <div class="mini-kpi-label">Biológicos riesgo alto</div>
+            <div id="kpiBioRiesgoAlto" class="mini-kpi-value">—</div>
+            <div id="kpiBioRiesgoAltoSub" class="mini-kpi-sub">—</div>
+          </div>
+
+          <div class="mini-kpi">
+            <div class="mini-kpi-label">Insumos riesgo alto</div>
+            <div id="kpiInsRiesgoAlto" class="mini-kpi-value">—</div>
+            <div id="kpiInsRiesgoAltoSub" class="mini-kpi-sub">—</div>
+          </div>
+        </div>
+
+        <div class="rec-table-wrap">
+          <table class="rec-table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Ítem</th>
+                <th>Riesgo de quiebre</th>
+                <th>Riesgo de sobre-stock</th>
+                <th>Pedido sugerido</th>
+              </tr>
+            </thead>
+            <tbody id="tblRecomendaciones">
+              <tr>
+                <td colspan="5" class="rec-muted">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="lotDetail" class="card dash-card lot-detail is-empty">
+        <div class="lot-empty">
+          <div class="lot-empty-title">Sin selección</div>
+          <div class="lot-empty-sub">Haz clic en un ítem de la tabla para ver lotes.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- =========================
+       MAPA DE RIESGOS (FULL WIDTH)
+    ========================== -->
+    <div class="dash-grid-full">
+      <div class="card dash-card dash-card-wide">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Mapa de riesgos</h3>
+          <p class="dash-card-sub">Comparación de riesgo de quiebre vs vencimiento</p>
+        </div>
+        <div id="pltRiskRadar" class="plot plot-radar"></div>
+      </div>
+    </div>
+
+  </section>
 
   <!-- =========================
-     MAPA DE RIESGOS (FULL WIDTH)
+     SECCIÓN: COMPARATIVOS (ACTUALIZADA)
+     - KPIs más “presentables” (A / B en 2 columnas + Δ)
+     - Mantiene IDs existentes de KPIs (NO ROMPE tu JS actual)
+     - Agrega nuevos plots para: waterfall, esquema, riesgo, sexo, edades, parroquia (treemap)
 ========================== -->
-  <div class="dash-grid-full">
-    <div class="card dash-card dash-card-wide">
-      <div class="dash-card-head">
-        <h3 class="dash-card-title">Mapa de riesgos (Top ítems)</h3>
-        <p class="dash-card-sub">Comparación de riesgo de quiebre vs vencimiento (0–1) usando stock real + forecast.</p>
-      </div>
-      <div id="pltRiskRadar" class="plot plot-radar"></div>
-    </div>
-  </div>
+  <section id="secComparativos" class="seccion-dash is-hidden" data-sec="comparativos">
 
-</div>
+    <div class="card dash-card dash-card-big">
+      <div class="dash-card-head">
+        <h3 class="dash-card-title">Comparación interperiodo</h3>
+        <p class="dash-card-sub">KPIs y análisis comparativo por periodo (reportes fijos).</p>
+      </div>
+
+      <div class="comparativos-filtros">
+        <div class="filter-item">
+          <label class="filter-label">Periodo A</label>
+          <select id="selPeriodoA" class="uf-input"></select>
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">Periodo B</label>
+          <select id="selPeriodoB" class="uf-input"></select>
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">Actualizar</label>
+          <button id="btnCompActualizar" class="btn-mini" type="button">Comparar</button>
+        </div>
+      </div>
+
+      <!-- KPIs comparativos -->
+      <div class="comp-kpis">
+        <div class="kpi-card">
+          <div class="kpi-label">Diferencia de dosis válidas</div>
+          <div id="kpiCompDosis" class="kpi-value">—</div>
+          <div id="kpiCompDosisSub" class="kpi-sub">—</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Diferencia de personas únicas</div>
+          <div id="kpiCompPersonas" class="kpi-value">—</div>
+          <div id="kpiCompPersonasSub" class="kpi-sub">—</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Diferencia de registros válidos</div>
+          <div id="kpiCompValidos" class="kpi-value">—</div>
+          <div id="kpiCompValidosSub" class="kpi-sub">—</div>
+        </div>
+      </div>
+
+      <!-- fila principal -->
+      <div class="dash-grid2">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tCompTopVacunas"
+              data-title-base="Vacunas con mayor volumen de dosis aplicadas"></h3>
+            <p class="dash-card-sub">Comparación interperiodo por biológico</p>
+          </div>
+          <div id="pltCompDim" class="plot plot-tall"></div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tCompDrivers"
+              data-title-base="Factores que impulsan la variación entre periodos"></h3>
+            <p class="dash-card-sub">Descomposición de la diferencia</p>
+          </div>
+          <div id="pltCompDrivers" class="plot plot-tall"></div>
+        </div>
+      </div>
+
+      <!-- fila reportes fijos -->
+      <div class="dash-grid2">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tCompEsquema" data-title-base="Estructura de captación por esquema"></h3>
+            <p class="dash-card-sub">Participación porcentual de cada esquema</p>
+          </div>
+          <div id="pltCompEsquemas" class="plot plot-donut"></div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tCompSexo" data-title-base="Composición por sexo de la población vacunada">
+            </h3>
+            <p class="dash-card-sub">Comparación porcentual entre periodos.</p>
+          </div>
+          <div id="pltCompSexo" class="plot plot-donut"></div>
+        </div>
+      </div>
+
+      <!-- Riesgo (ancho completo) -->
+      <div class="dash-grid1">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tCompRiesgo" data-title-base="Segmentación por grupo de riesgo"></h3>
+            <p class="dash-card-sub">Distribución porcentual comparativa por categoría de riesgo</p>
+          </div>
+          <div id="pltCompRiesgo" class="plot plot-donut plot-donut-wide"></div>
+        </div>
+      </div>
+
+
+      <div class="dash-grid2">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tCompEdad" data-title-base="Distribución etaria de dosis aplicadas"></h3>
+            <p class="dash-card-sub">Comparación interperiodo por grupo etario.</p>
+          </div>
+          <div id="pltCompEdad" class="plot"></div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-card-head">
+
+            <h3 class="dash-card-title" id="tCompParroquia"
+              data-title-base="Parroquias con mayor volumen de vacunación"></h3>
+            <p class="dash-card-sub">Comparación de dosis válidas por territorio.</p>
+          </div>
+          <div id="pltCompParroquia" class="plot"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+
+  <!-- =========================
+     SECCIÓN: ANUAL (MVP)
+  ========================== -->
+  <section id="secAnual" class="seccion-dash is-hidden" data-sec="anual">
+
+    <div class="card dash-card dash-card-big">
+      <div class="dash-card-head">
+        <h3 class="dash-card-title" id="tAnualMain" data-title-base="Consolidado anual">Consolidado anual</h3>
+        <p class="dash-card-sub" id="sAnualMain">Vista estratégica tendencias, distribución y consumo de insumos.</p>
+      </div>
+
+      <div class="dash-filters dash-filters-anual" id="anualFilters">
+        <div class="filter">
+          <label for="selAnio">Año</label>
+          <select id="selAnio" class="uf-input"></select>
+        </div>
+        <button class="btn" id="btnAnualActualizar" type="button">Actualizar</button>
+      </div>
+
+      <!-- ===== FILA 1: Col 1 Calidad (donut) | Col 2 KPIs (stack) ===== -->
+      <div class="anual-top-grid">
+
+        <!-- IZQUIERDA: DONUT CALIDAD -->
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 id="tAnualCalidad" class="dash-card-title" data-title-base="Calidad de registros">
+              Calidad de registros
+            </h3>
+            <p class="dash-card-sub">Proporción de registros válidos respecto al total anual.</p>
+          </div>
+          <div id="pltAnualCalidad"></div>
+        </div>
+
+        <!-- DERECHA: KPIs sueltos -->
+        <div class="anual-kpis">
+
+          <div class="anual-kpi-card kpi-a">
+            <div class="kpi-label">Dosis totales aplicadas</div>
+            <div id="kpiAnualDosis" class="kpi-value">—</div>
+            <div id="kpiAnualDosisSub" class="kpi-sub">—</div>
+          </div>
+
+          <div class="anual-kpi-card kpi-b">
+            <div class="kpi-label">Total de personas vacunadas</div>
+            <div id="kpiAnualPersonas" class="kpi-value">—</div>
+            <div id="kpiAnualPersonasSub" class="kpi-sub">—</div>
+          </div>
+
+          <div class="anual-kpi-card kpi-c">
+            <div class="kpi-label">Mes con mayor afluencia</div>
+            <div id="kpiAnualPeak" class="kpi-value">—</div>
+            <div id="kpiAnualPeakSub" class="kpi-sub">—</div>
+            <!-- SUB eliminado a propósito -->
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- ===== Top vacunas anual (ancho completo) ===== -->
+      <div class="dash-grid1">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tAnualTopVac" data-title-base="Ranking anual de vacunas por dosis"></h3>
+            <p class="dash-card-sub">volumen de dosis aplicadas.</p>
+          </div>
+          <div id="pltAnualTopVac" class="plot plot-tall"></div>
+        </div>
+      </div>
+
+      <!-- ===== Dosis por mes (área) | Personas por mes (barras) ===== -->
+      <div class="dash-grid2">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tAnualDosisMes" data-title-base="Tendencia mensual de dosis"></h3>
+            <p class="dash-card-sub">Serie mensual de dosis acumulada</p>
+          </div>
+          <div id="pltAnualDosisMes" class="plot plot-tall"></div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tAnualPersonasMes"
+              data-title-base="Tendencia mensual de personas vacunadas"></h3>
+            <p class="dash-card-sub">Conteo mensual de personas únicas vacunadas.</p>
+          </div>
+          <div id="pltAnualPersonasMes" class="plot plot-tall"></div>
+        </div>
+      </div>
+
+      <!-- ===== Esquema (barra) | Top por mes (barras con etiqueta vacuna) ===== -->
+      <div class="dash-grid2">
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tAnualEsquema" data-title-base="Distribución anual por esquema"></h3>
+            <p class="dash-card-sub">Conteo de dosis por captación</p>
+          </div>
+          <div id="pltAnualEsquemas" class="plot plot-tall"></div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tAnualTopMes" data-title-base="Vacuna líder mensual"></h3>
+            <p class="dash-card-sub">Vacuna con mayor dosis</p>
+          </div>
+          <div id="pltAnualTopMes" class="plot plot-tall"></div>
+        </div>
+      </div>
+
+      <!-- ===== INSUMOS: 1 tarjeta (70/30) ===== -->
+      <div class="dash-grid1">
+        <div class="card dash-card dash-insumos">
+          <div class="dash-card-head">
+            <h3 class="dash-card-title" id="tAnualInsumosKPIs" data-title-base="Insumos anuales estimados"></h3>
+            <p class="dash-card-sub">Estimación basada en reglas de consumo</p>
+          </div>
+
+          <div class="insumos-split">
+            <!-- 70%: gráfico -->
+            <div class="insumos-left">
+              <div class="dash-card-head insumos-inner-head">
+                <h3 class="dash-card-title sm" id="tAnualInsumosLinea"
+                  data-title-base="Consumo mensual de jeringas y guantes"></h3>
+                <!--<p class="dash-card-sub">Jeringas = dosis mensuales; Guantes = personas únicas mensuales.</p>-->
+              </div>
+
+              <div id="pltAnualInsumosMes" class="plot plot-tall"></div>
+            </div>
+
+            <!-- 30%: KPIs -->
+            <div class="insumos-right anual-kpis-compact anual-kpis-compact--stack">
+              <div class="kpi-card kpi-card--mini kpi-green">
+                <div class="kpi-label">Rollos de algodón usados</div>
+                <div id="kpiAnualAlgodon" class="kpi-value">—</div>
+                <!--<div id="kpiAnualAlgodonSub" class="kpi-sub">—</div>-->
+              </div>
+
+              <div class="kpi-card kpi-card--mini kpi-amber">
+                <div class="kpi-label">Litros de Alcohol usado</div>
+                <div id="kpiAnualAlcoholL" class="kpi-value">—</div>
+                <!--<div id="kpiAnualAlcoholSub" class="kpi-sub">—</div>-->
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </section>
+
 
 
 </div>

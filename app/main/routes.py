@@ -61,7 +61,7 @@ from app.services.biologico_write_service import (
     upsert_bio_insumo_tipo
 )
 
-from app.services.predict_service import predict_ml_bundle
+from app.services.predict_service import predict_ml_bundle, insumos_estimados_bundle
 from app.services.chatbot_service import ChatbotService
 
 
@@ -216,6 +216,23 @@ def api_dashboard_data():
         return jsonify(r[0])
     return jsonify(r or {"ok": False})
 
+@main_bp.route('/api/dashboard/insumos_estimados', methods=['POST'])
+@login_required
+def api_dashboard_insumos_estimados():
+    try:
+        p = request.get_json(silent=True) or {}
+        periodo = _n(p.get("periodo"))  # YYYY-MM
+        vacuna = _n(p.get("vacuna"))
+
+        if not periodo:
+            return jsonify({"ok": False, "error": "periodo requerido"}), 400
+
+        out = insumos_estimados_bundle(periodo=periodo, vacuna=vacuna)  # <- tu wrapper
+        return jsonify(out)
+    except Exception as e:
+        print("insumos_estimados error:", e, flush=True)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 
 
 def _n(v):
@@ -243,6 +260,7 @@ def api_dashboard_predict():
             "fecha_desde": _n(p.get("fecha_desde")),
             "fecha_hasta": _n(p.get("fecha_hasta")),
             "window_days": p.get("window_days"),
+            "horizon_m": p.get("horizon_m"),
         }
         print("PREDICT_ML input:", payload_dbg, flush=True)
 
@@ -253,13 +271,20 @@ def api_dashboard_predict():
             wd = 180
         wd = max(60, min(wd, 365))  # mínimo razonable / máximo controlado
 
+        # NUEVO: horizon_m (1,3,6,12)
+        try:
+            hm = int(payload_dbg["horizon_m"]) if payload_dbg["horizon_m"] is not None else 1
+        except Exception:
+            hm = 1
+        hm = max(1, min(hm, 12))  # límite duro
+
         # IMPORTANTE: solo una ejecución
         out = predict_ml_bundle(
             periodo=payload_dbg["periodo"],
             vacuna=payload_dbg["vacuna"],
-            window_days=wd
+            window_days=wd,
+            horizon_m=hm,
         )
-
         # Debug (sin recalcular)
         try:
             people = (out.get("people") or {}).get("series", {}) or {}
@@ -281,6 +306,58 @@ def api_dashboard_predict():
     except Exception as e:
         print("predict_ml error:", e, flush=True)
         return jsonify({"ok": False, "error": str(e)}), 500
+
+
+
+@main_bp.route('/api/dashboard/compare', methods=['POST'])
+@login_required
+@role_required("ADMINISTRADOR", "COORDINADOR", "ASISTENTE")
+def api_dashboard_compare():
+    p = request.get_json() or {}
+
+    def _n(v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = v.strip()
+            return v if v != "" else None
+        return v
+
+    payload = {
+        "p_periodo_a": _n(p.get("periodo_a")),
+        "p_periodo_b": _n(p.get("periodo_b")),
+    }
+
+    print("PAYLOAD RPC COMPARE:", payload, flush=True)
+    r = supabase.rpc("dashboard_compare_v3", payload).execute().data
+
+    if isinstance(r, list) and r:
+        return jsonify(r[0])
+    return jsonify(r or {"ok": False})
+
+
+
+@main_bp.route('/api/dashboard/anual', methods=['POST'])
+@login_required
+@role_required("ADMINISTRADOR", "COORDINADOR", "ASISTENTE")
+def api_dashboard_anual():
+    body = request.get_json(silent=True) or {}
+
+    args = {
+        "p_year": body.get("year"),  # solo año
+        # opcional: reglas (si no mandas, usa defaults de la RPC)
+        "p_dosis_por_rollo": body.get("dosis_por_rollo"),
+        "p_ml_alcohol_por_dosis": body.get("ml_alcohol_por_dosis"),
+    }
+
+    # limpia None (supabase rpc a veces se pone sensible)
+    args = {k: v for k, v in args.items() if v is not None}
+
+    r = supabase.rpc("dashboard_anual_v2", args).execute().data
+    if isinstance(r, list) and r:
+        return jsonify(r[0])
+    return jsonify(r or {"ok": False})
+
 
 
 

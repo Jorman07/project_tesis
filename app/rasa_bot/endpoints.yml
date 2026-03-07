@@ -1,2 +1,2 @@
 action_endpoint:
-  url: "https://actions-bot.onrender.com/webhook"
+  url: "https://actions-bot.onrender.com"

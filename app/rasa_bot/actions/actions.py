@@ -8,7 +8,7 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
 
 
-FLASK_BOT_BASE_URL = os.getenv("FLASK_BOT_BASE_URL", "http://127.0.0.1:5000")
+FLASK_BOT_BASE_URL = os.getenv("FLASK_BOT_BASE_URL", "")
 BOT_KEY = os.getenv("BOT_KEY", "")
 
 # ------------------------- helpers base -------------------------

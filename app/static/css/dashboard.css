@@ -1,135 +1,277 @@
 /* ============================
-   dashboard.css 
+   dashboard.css
    ============================ */
 
-.dashboard-page{
+.dashboard-page {
   display: grid;
   gap: 14px;
+  position: relative;
+  /* importante para secciones ocultas */
 }
 
 /* Header */
-.dash-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+.dash-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.dash-title{ margin: 0; }
+.dash-title {
+  margin: 0;
+}
 
-.dash-subtitle{
+.dash-subtitle {
   margin: 6px 0 0 0;
   opacity: .75;
   font-size: 12px;
 }
 
 /* Filters */
-.dash-filters{
-  display:flex;
+.dash-filters {
+  display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  align-items:flex-end;
+  align-items: flex-end;
 }
 
-.filter-item{
-  display:grid;
+.filter-item {
+  display: grid;
   gap: 6px;
   min-width: 220px;
 }
 
-.filter-label{
-  opacity:.75;
-  font-size:12px;
+.filter-label {
+  opacity: .75;
+  font-size: 12px;
 }
 
 /* Message */
-.form-msg{
+.form-msg {
   margin: 0;
   font-size: 12px;
   opacity: .85;
 }
 
 /* KPIs */
-.dash-kpis{
-  display:grid;
+.dash-kpis {
+  display: grid;
   grid-template-columns: repeat(6, minmax(160px, 1fr));
   gap: 12px;
 }
 
-.kpi-card{
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border, rgba(255,255,255,0.12));
+.kpi-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
   border-radius: 14px;
   padding: 12px;
   position: relative;
   overflow: hidden;
 }
 
-.kpi-card::before{
-  content:"";
-  position:absolute;
-  left:0; top:0; bottom:0;
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 6px;
   opacity: .95;
 }
 
-/* Colores KPIs (sin tocar HTML) */
-.dash-kpis .kpi-card:nth-child(1)::before{ background: #3b82f6; }
-.dash-kpis .kpi-card:nth-child(2)::before{ background: #22c55e; }
-.dash-kpis .kpi-card:nth-child(3)::before{ background: #f59e0b; }
-.dash-kpis .kpi-card:nth-child(4)::before{ background: #a855f7; }
-.dash-kpis .kpi-card:nth-child(5)::before{ background: #ef4444; }
-.dash-kpis .kpi-card:nth-child(6)::before{ background: #06b6d4; }
+.dash-kpis .kpi-card:nth-child(1)::before {
+  background: #3b82f6;
+}
 
-.kpi-label{
+.dash-kpis .kpi-card:nth-child(2)::before {
+  background: #22c55e;
+}
+
+.dash-kpis .kpi-card:nth-child(3)::before {
+  background: #f59e0b;
+}
+
+.dash-kpis .kpi-card:nth-child(4)::before {
+  background: #a855f7;
+}
+
+.dash-kpis .kpi-card:nth-child(5)::before {
+  background: #ef4444;
+}
+
+.dash-kpis .kpi-card:nth-child(6)::before {
+  background: #06b6d4;
+}
+
+.kpi-label {
   font-size: 12px;
   opacity: .75;
 }
 
-.kpi-value{
-  font-size: 22px;
+.kpi-value {
+  font-size: clamp(18px, 2.3vw, 28px);
+  line-height: 1.05;
   font-weight: 900;
   margin-top: 6px;
   letter-spacing: .2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.kpi-sub{
+.kpi-sub {
   font-size: 12px;
   opacity: .7;
   margin-top: 4px;
+
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* =========================
+   MENÚ PRINCIPAL DASHBOARD
+========================= */
+
+#menuSecciones {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* botones */
+#menuSecciones .tab-btn {
+  flex: 1;
+  /* todos ocupan el mismo ancho */
+  height: 80px;
+  /* tamaño grande tipo módulo */
+  border: none;
+  background: #0f172a;
+  /* fondo oscuro base */
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0;
+}
+
+/* quitar divisor del último */
+#menuSecciones .tab-btn:last-child {
+  border-right: none;
+}
+
+/* hover */
+#menuSecciones .tab-btn:hover {
+  background: #1e293b;
+  color: #ffffff;
+}
+
+/* activo */
+#menuSecciones .tab-btn.is-active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+}
+
+/* =========================
+   MENÚ PREMIUM SaaS
+========================= */
+
+#menuSecciones {
+  position: relative;
+  display: flex;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 6px;
+  gap: 6px;
+}
+
+/* botones */
+#menuSecciones .tab-btn {
+  flex: 1;
+  height: 64px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  z-index: 2;
+}
+
+/* hover */
+#menuSecciones .tab-btn:hover {
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* activo */
+#menuSecciones .tab-btn.is-active {
+  color: #ffffff;
+}
+
+/* indicador deslizante */
+#menuSecciones::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: var(--width);
+  transform: translateX(var(--translate));
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border-radius: 10px;
+  transition: transform 0.35s cubic-bezier(.77, 0, .18, 1);
+  z-index: 1;
 }
 
 /* ============================
-   GRIDS (clave: stretch)
+   GRIDS
    ============================ */
-
 .dash-grid,
 .dash-grid2,
-.dash-grid3{
-  display:grid;
+.dash-grid3,
+.dash-grid-full {
+  display: grid;
   gap: 12px;
-  align-items: stretch;
+  align-items: start;
+  /* evita estiramientos raros */
 }
 
-.dash-grid{
+.dash-grid {
   grid-template-columns: 1.2fr .8fr;
 }
 
-.dash-grid2{
+.dash-grid2 {
   grid-template-columns: 1fr 1fr;
 }
 
-.dash-grid3{
+.dash-grid3 {
   grid-template-columns: 1fr 1fr 1fr;
 }
 
-/* ============================
-   STACK (para apilar tarjetas)
-   ============================ */
+.dash-grid-full {
+  grid-template-columns: 1fr;
+}
 
-.dash-stack{
-  display:flex;
+/* ============================
+   STACK
+   ============================ */
+.dash-stack {
+  display: flex;
   flex-direction: column;
   gap: 14px;
   min-width: 0;
@@ -138,115 +280,166 @@
 /* ============================
    Cards
    ============================ */
-
-.dash-card{
+.dash-card {
   padding: 12px;
-
   display: flex;
   flex-direction: column;
   gap: 10px;
 
   overflow: hidden;
   min-height: 430px;
-
-  /* Sombra suave para que no “se pegue” visualmente */
-  box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  min-width: 0;
 }
 
-/* fila 2 más “grande” (opcional) */
-.dash-card-big{
+.dash-card-big {
   min-height: 520px;
 }
 
-.dash-card-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
+.dash-card-wide {
+  min-height: 520px;
+}
+
+.dash-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 10px;
   flex-wrap: wrap;
-
   min-height: 54px;
 }
 
-.dash-card-title{
+.dash-card-title {
   margin: 0;
   font-size: 14px;
   font-weight: 900;
 }
 
-.dash-card-sub{
+.dash-card-sub {
   margin: 2px 0 0 0;
   opacity: .7;
   font-size: 12px;
 }
 
 /* ============================
-   Plot containers (NO FIJOS)
+   PLOTS (una sola fuente de verdad)
+   - NO flex:1
+   - NO height:auto
    ============================ */
-
-.plot{
+.plot {
   position: relative;
   width: 100%;
-  flex: 1;
+  height: 320px;
   min-height: 320px;
-  height: auto;
+
+  /* antes: padding: 8px;  -> recorta layout interno de Plotly */
+  padding: 0;
+
+  overflow: hidden;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
-.plot-tall{
+
+.plot-tall {
+  height: 420px;
   min-height: 420px;
 }
 
-.js-plotly-plot .modebar-container{
+.plot-radar {
+  height: 420px;
+  min-height: 420px;
+}
+
+/* Plotly ocupa exacto el contenedor .plot */
+.plotly-graph-div,
+.plot .js-plotly-plot {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+}
+
+/* Modebar */
+.js-plotly-plot .modebar-container {
   top: 6px !important;
   right: 6px !important;
 }
 
-/* ============================
-   Ajuste específico FILA 1
-   ============================ */
+/* PANORAMA - Insumos estimados: más alto para que la leyenda no choque */
+#pltInsumosEstimados.plot {
+  height: 420px;
+  min-height: 420px;
+}
 
-.dash-row1{
-  gap: 18px;          /* aire entre las 2 columnas */
+/* ============================
+   Fila 1 ajustes visuales
+   ============================ */
+.dash-row1 {
+  gap: 18px;
   padding-top: 4px;
 }
 
-.dash-row1-stack{
-  gap: 18px;          /* aire entre tarjetas apiladas */
+.dash-row1-stack {
+  gap: 18px;
 }
 
-/* Las tarjetas de la fila 1 deben verse “cuadradas” */
-.dash-row1 .dash-card{
+.dash-row1 .dash-card {
   min-height: 340px;
 }
 
-.dash-row1 .plot{
+.dash-row1 .plot {
   min-height: 240px;
+  height: 240px;
 }
 
-.dash-row1 .plot-tall{
+.dash-row1 .plot-tall {
   min-height: 260px;
+  height: 260px;
 }
+
+/* ============================
+   cambios de altura para graficos
+   ============================ */
+/*.dash-row2 .plot {
+  min-height: 300px;
+  height: 300px;
+}
+
+.dash-row2 .plot-tall {
+  min-height: 340px;
+  height: 340px;
+}*/
+
+/* si la card queda corta, acompaña */
+/*.dash-row2 .dash-card {
+  min-height: 420px;
+}*/
+
+/* PREDICCIÓN - Personas: más alto para que leyenda no choque con eje X */
+/*#pltPredPeople.plot{
+  height: 420px;
+  min-height: 420px;
+}*/
 
 /* ============================
    Inputs / Buttons
    ============================ */
-
-.uf-input{
-  background: rgba(255,255,255,0.03);
+.uf-input {
+  background: rgba(255, 255, 255, 0.03);
   color: var(--text, #e6eefc);
-  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
   border-radius: 10px;
   padding: 8px 10px;
   outline: none;
 }
 
-.uf-input:focus{
-  border-color: rgba(26,92,255,0.9);
-  box-shadow: 0 0 0 3px rgba(26,92,255,0.18);
+.uf-input:focus {
+  border-color: rgba(26, 92, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(26, 92, 255, 0.18);
 }
 
-.btn-mini{
-  background: rgba(26,92,255,0.95);
+.btn-mini {
+  background: rgba(26, 92, 255, 0.95);
   color: #fff;
   border: 0;
   border-radius: 10px;
@@ -255,379 +448,1045 @@
   font-weight: 800;
 }
 
-.btn-mini:hover{ filter: brightness(1.05); }
+.btn-mini:hover {
+  filter: brightness(1.05);
+}
+
+select.uf-input {
+  color-scheme: dark;
+}
+
+select.uf-input option,
+select.uf-input optgroup {
+  background-color: #0b1220;
+  color: #e6eefc;
+}
 
 /* ============================
    KPIs internos dentro de una dash-card
    ============================ */
-
-.dash-mini-kpis{
-  display:flex;
-  gap:12px;
+.dash-mini-kpis {
+  display: flex;
+  gap: 12px;
   padding: 10px 12px 0 12px;
   flex-wrap: wrap;
 }
 
-.mini-kpi{
-  flex:1 1 220px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+.mini-kpi {
+  flex: 1 1 220px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 10px 12px;
   position: relative;
   overflow: hidden;
 }
 
-/* mini colorbar */
-.mini-kpi::before{
-  content:"";
-  position:absolute;
-  left:0; top:0; bottom:0;
+.mini-kpi::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 5px;
   opacity: .9;
   background: #06b6d4;
 }
 
-.mini-kpi-label{
+.mini-kpi-label {
   font-size: 12px;
   opacity: .85;
   margin-bottom: 6px;
 }
 
-.mini-kpi-value{
+.mini-kpi-value {
   font-size: 20px;
   font-weight: 700;
   line-height: 1.1;
 }
 
-.mini-kpi-sub{
+.mini-kpi-sub {
   font-size: 12px;
   opacity: .75;
   margin-top: 4px;
 }
 
-/* ============================
-   Responsive
-   ============================ */
-
-@media (max-width: 1200px){
-  .dash-kpis{
-    grid-template-columns: repeat(2, minmax(160px, 1fr));
-  }
-  .dash-grid{
-    grid-template-columns: 1fr;
-  }
-  .dash-grid2{
-    grid-template-columns: 1fr;
-  }
-  .dash-grid3{
-    grid-template-columns: 1fr;
-  }
-  .filter-item{
-    min-width: 180px;
-  }
-
-  .dash-card{
-    min-height: 420px;
-  }
-
-  .dash-card-big{
-    min-height: 480px;
-  }
-
-  .dash-row1{
-    gap: 14px;
-  }
-  .dash-row1-stack{
-    gap: 14px;
-  }
-}
-
-/* Evita recortes visuales dentro del gráfico (Plotly) */
-.plot{
-  padding: 8px;              /* aire extra alrededor del canvas */
-  box-sizing: border-box;
-}
-
-/* Por si algún contenedor interno de Plotly se sale */
-.plot .js-plotly-plot{
-  width: 100%;
-  height: 100%;
+.dash-filters-pred {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16px 20px;
+  border-radius: 14px;
+  margin-bottom: 30px;
 }
 
 /* ============================
    Recomendaciones (tabla)
    ============================ */
-.rec-table-wrap{
+.rec-table-wrap {
   width: 100%;
   overflow: auto;
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 12px;
+  background: rgba(255, 255, 255, 0.015);
 }
 
-.rec-table{
+.rec-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 720px;
 }
 
 .rec-table th,
-.rec-table td{
+.rec-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 12px;
   white-space: nowrap;
 }
 
-.rec-table th{
+.rec-table th {
   text-align: left;
   opacity: .85;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.rec-muted{
+.rec-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(20, 30, 45, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.rec-muted {
   opacity: .65;
   padding: 14px;
 }
 
-/* badges riesgo */
-.risk{
+.rec-row {
+  cursor: pointer;
+}
+
+.rec-row:hover {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.rec-row:active {
+  background: rgba(59, 130, 246, 0.10);
+}
+
+/* badges */
+.risk {
   display: inline-block;
   padding: 4px 8px;
   border-radius: 999px;
   font-weight: 900;
   font-size: 11px;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  letter-spacing: .2px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
-.risk-high{ background: rgba(239,68,68,0.18); color: #ffb4b4; }
-.risk-med{  background: rgba(245,158,11,0.18); color: #ffd39a; }
-.risk-low{  background: rgba(34,197,94,0.16);  color: #b7f7cc; }
+.risk-high {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ffb4b4;
+}
+
+.risk-med {
+  background: rgba(245, 158, 11, 0.18);
+  color: #ffd39a;
+}
+
+.risk-low {
+  background: rgba(34, 197, 94, 0.16);
+  color: #b7f7cc;
+}
 
 /* ============================
-   DETALLE LOTES (TARJETA DERECHA)
-   - NO crecer: scroll interno
-   - Scroll horizontal discreto + vertical discreto
+   DETALLE LOTES (panel derecho)
    ============================ */
-
-/* IMPORTANTE:
-   - Esto evita que la card derecha se “estire”
-   - Deja el contenido (tabla/lista) scrolleable dentro
-*/
 #lotDetail.lot-detail,
-.lot-detail{
+.lot-detail {
   width: 100%;
-  padding: 12px;          /* igual que dash-card */
-  min-height: 430px;      /* coherente con dash-card */
-  max-height: calc(100vh - 160px); /* evita extenderse (ajusta si tu header es más alto) */
+  padding: 12px;
+  min-height: 430px;
+  max-height: calc(100vh - 160px);
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.03);
-  box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
 
-  overflow: auto;         /* vertical + horizontal si hace falta */
+  overflow: auto;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
 }
 
-/* Estado vacío */
-.lot-detail.is-empty{
+.lot-detail.is-empty {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 220px;
 }
 
-.lot-empty{
+.lot-empty {
   text-align: center;
   opacity: .85;
   padding: 18px;
-  border: 1px dashed rgba(255,255,255,0.18);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
   border-radius: 14px;
   width: 100%;
   max-width: 520px;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.lot-empty-title{
+.lot-empty-title {
   font-weight: 900;
   margin-bottom: 6px;
 }
 
-.lot-empty-sub{
+.lot-empty-sub {
   opacity: .75;
   font-size: 12px;
 }
 
-.lot-title{
+.lot-title {
   font-weight: 900;
   margin-bottom: 10px;
 }
 
-/* Tabla lotes */
-.lot-table{
+.lot-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 520px;
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 12px;
-  background: rgba(255,255,255,0.012);
+  background: rgba(255, 255, 255, 0.012);
   overflow: hidden;
 }
 
 .lot-table th,
-.lot-table td{
+.lot-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 12px;
   white-space: nowrap;
 }
 
-.lot-table th{
+.lot-table th {
   text-align: left;
   opacity: .85;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
-/* ============================
-   SCROLLBARS (DISCRETOS / TEMA OSCURO)
-   - Aplica a: panel derecho + tablas con overflow
-   ============================ */
-
-/* Firefox */
+/* Scrollbars discretos */
 .lot-detail,
-.rec-table-wrap{
+.rec-table-wrap {
   scrollbar-width: thin;
-  scrollbar-color: rgba(34,197,94,0.55) rgba(255,255,255,0.06);
+  scrollbar-color: rgba(34, 197, 94, 0.55) rgba(255, 255, 255, 0.06);
 }
 
-/* WebKit (Chrome/Edge) */
 .lot-detail::-webkit-scrollbar,
-.rec-table-wrap::-webkit-scrollbar{
-  width: 8px;   /* vertical */
-  height: 8px;  /* horizontal (discreto) */
+.rec-table-wrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
 .lot-detail::-webkit-scrollbar-track,
-.rec-table-wrap::-webkit-scrollbar-track{
-  background: rgba(255,255,255,0.06);
+.rec-table-wrap::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 999px;
 }
 
 .lot-detail::-webkit-scrollbar-thumb,
-.rec-table-wrap::-webkit-scrollbar-thumb{
-  background: rgba(34,197,94,0.55); /* verde discreto */
+.rec-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(34, 197, 94, 0.55);
   border-radius: 999px;
-  border: 2px solid rgba(15,23,42,0.55); /* “se integra” al fondo */
+  border: 2px solid rgba(15, 23, 42, 0.55);
 }
 
 .lot-detail::-webkit-scrollbar-thumb:hover,
-.rec-table-wrap::-webkit-scrollbar-thumb:hover{
-  background: rgba(34,197,94,0.75);
+.rec-table-wrap::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 197, 94, 0.75);
 }
 
-/* Para que el horizontal no se vea “grueso” */
-.lot-detail::-webkit-scrollbar:horizontal,
-.rec-table-wrap::-webkit-scrollbar:horizontal{
-  height: 7px;
+
+/* ============================
+   TABS
+   ============================ */
+.dash-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 10px 6px 2px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.tab-btn {
+  background: rgba(255, 255, 255, 0.03);
+  color: #e6eefc;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: .2px;
+  transition: transform .05s ease, filter .12s ease, background .12s ease;
+  user-select: none;
+}
+
+.tab-btn:hover {
+  filter: brightness(1.05);
+}
+
+.tab-btn:active {
+  transform: translateY(1px);
+}
+
+.tab-btn.is-active {
+  background: rgba(26, 92, 255, 0.28);
+  border-color: rgba(26, 92, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(26, 92, 255, 0.14);
+}
+
+.seccion-dash {
+  display: block;
+}
+
+/* IMPORTANTE: NO usar display:none con Plotly */
+.seccion-dash.is-hidden {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* ============================
-   RECOMENDACIONES + DETALLE (PRO)
+   COMPARATIVOS
+   ============================ */
+.comparativos-filtros {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  padding: 6px 0 2px 0;
+}
+
+.comp-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.dash-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+}
+
+/* ============================
+   Responsive
+   ============================ */
+@media (max-width: 1200px) {
+  .dash-kpis {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-grid3 {
+    grid-template-columns: 1fr;
+  }
+
+  .comp-kpis {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+
+  .filter-item {
+    min-width: 180px;
+  }
+
+  .dash-card {
+    min-height: 420px;
+  }
+
+  .dash-card-big {
+    min-height: 480px;
+  }
+
+  .dash-row1 {
+    gap: 14px;
+  }
+
+  .dash-row1-stack {
+    gap: 14px;
+  }
+}
+
+/* ============================
+   COMPARATIVOS: plots y recortes
+   ============================ */
+#secComparativos .dash-grid2 {
+  align-items: start;
+}
+
+#secComparativos .dash-card {
+  min-height: 0;
+  /* no forzar 430 aquí; deja que el contenido mande */
+}
+
+#secComparativos .plot {
+  height: 380px;
+  min-height: 380px;
+
+  /* en compare hay títulos largos + ticks rotados */
+  overflow: visible;
+  /* evita cortar títulos/labels */
+}
+
+@media (max-width: 1200px) {
+  #secComparativos .plot {
+    height: 360px;
+    min-height: 360px;
+  }
+}
+
+/* Plotly modebar: que no estorbe títulos */
+#secComparativos .js-plotly-plot .modebar-container {
+  top: 10px !important;
+  right: 10px !important;
+  opacity: .35;
+  transition: opacity .12s ease;
+  pointer-events: auto;
+}
+
+#secComparativos .js-plotly-plot:hover .modebar-container {
+  opacity: .95;
+}
+
+/* Compare: no recortar KPI */
+#secComparativos .kpi-value {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+#secComparativos .kpi-sub {
+  -webkit-line-clamp: unset;
+  display: block;
+  overflow: visible;
+}
+
+/* Matriz A/B bonita */
+.kpi-matrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: .85;
+}
+
+.kpi-matrix .col {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 6px 8px;
+}
+
+.kpi-matrix .tag {
+  opacity: .75;
+}
+
+.kpi-matrix .val {
+  font-weight: 900;
+}
+
+
+/* ============================
+   COMPARATIVOS: más alto + más aire
    ============================ */
 
-.dash-grid2 .dash-card{
-  backdrop-filter: blur(2px);
+/* la card grande necesita más altura real */
+#secComparativos .dash-card-big {
+  min-height: 820px;
 }
 
-.rec-table-wrap{
-  background: rgba(255,255,255,0.015);
-}
-
-.rec-table{
-  min-width: 0;           /* evita overflow innecesario */
-}
-
-.rec-table thead th{
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: rgba(20,30,45,0.92);
-  border-bottom: 1px solid rgba(255,255,255,0.10);
-}
-
-.rec-table tbody tr:nth-child(even){
-  background: rgba(255,255,255,0.02);
-}
-
-.rec-row{
-  cursor: pointer;
-}
-
-.rec-row:hover{
-  background: rgba(59,130,246,0.06);
-}
-
-.rec-row:active{
-  background: rgba(59,130,246,0.10);
-}
-
-.rec-row:focus-within{
-  outline: 2px solid rgba(59,130,246,0.25);
-  outline-offset: -2px;
-}
-
-.risk{
-  letter-spacing: .2px;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
-}
-
-/* Radar */
-#pltRiskRadar{
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 14px;
-  background: rgba(255,255,255,0.015);
-  padding: 6px;
-}
-
-/* Tabla → apariencia “lista” */
-.rec-table tbody tr{
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-.rec-table tbody td{
-  padding-top: 12px;
-  padding-bottom: 12px;
-}
-
-/* Fila full width */
-.dash-grid-full{
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  align-items: stretch;
-}
-
-/* Radar: no gigante */
-.plot-radar{
-  flex: 0 0 auto;
-  min-height: 420px;
+/* plots comparativos más altos */
+#secComparativos .plot {
   height: 420px;
+  min-height: 420px;
 }
 
-/* Tarjeta ancha */
-.dash-card-wide{
+/* plots que suelen necesitar más espacio (waterfall, barras con tickangle) */
+#secComparativos .plot.plot-tall {
+  height: 520px;
   min-height: 520px;
 }
 
-/* Mantén el select en tema oscuro cuando el navegador lo soporte */
-select.uf-input{
-  color-scheme: dark;
+/* grid con más aire vertical */
+#secComparativos .dash-grid2 {
+  gap: 14px;
 }
 
-/* Intento de colorear el desplegable (depende del SO/navegador) */
-select.uf-input option,
-select.uf-input optgroup{
-  background-color: #0b1220;
-  color: #e6eefc;
+#secComparativos .dash-grid3 {
+  gap: 14px;
+}
+
+/* KPIs comparativos: que no se corten */
+#secComparativos .comp-kpis .kpi-card {
+  min-height: 118px;
+}
+
+#secComparativos .comp-kpis .kpi-sub {
+  -webkit-line-clamp: 3;
+}
+
+/* leyendas Plotly: evita choque visual */
+#secComparativos .js-plotly-plot .legend {
+  transform: translateY(8px);
+}
+
+/* 1 columna (full width) */
+.dash-grid1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+/* altura consistente para donuts */
+.plot-donut {
+  min-height: 340px;
+  /* desktop */
+}
+
+/* riesgo tiende a tener leyendas largas: más alto */
+.plot-donut-wide {
+  min-height: 420px;
+}
+
+#pltCompRiesgo {
+  min-height: 600px;
+}
+
+/* ============================
+   KPI COMPARATIVOS (AISLADO)
+   No afecta KPIs generales.
+   Scope: .comp-kpis
+   ============================ */
+
+.comp-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+@media (max-width: 1200px) {
+  .comp-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .comp-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+.comp-kpis .kpi-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 14px 14px 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+/* línea superior */
+.comp-kpis .kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  opacity: .95;
+}
+
+/* brillo suave */
+.comp-kpis .kpi-card::after {
+  content: "";
+  position: absolute;
+  inset: -40% -20% auto -20%;
+  height: 120%;
+  transform: rotate(8deg);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 55%);
+  pointer-events: none;
+}
+
+.comp-kpis .kpi-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: rgba(230, 238, 252, 0.86);
+  margin-bottom: 8px;
+}
+
+.comp-kpis .kpi-value {
+  font-size: 30px;
+  font-weight: 950;
+  line-height: 1.05;
+  color: #fff;
+  text-shadow: 0 10px 18px rgba(0, 0, 0, 0.25);
+}
+
+.comp-kpis .kpi-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(230, 238, 252, 0.75);
+}
+
+/* ============================
+   Variación de color (4 tarjetas)
+   ============================ */
+
+/* 1: Verde/Cyan */
+.comp-kpis .kpi-card:nth-child(1) {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.22), rgba(6, 182, 212, 0.12), rgba(15, 23, 42, 0.35));
+}
+
+.comp-kpis .kpi-card:nth-child(1)::before {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 1), rgba(6, 182, 212, 1));
+}
+
+/* 2: Azul/Púrpura */
+.comp-kpis .kpi-card:nth-child(2) {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(168, 85, 247, 0.14), rgba(15, 23, 42, 0.35));
+}
+
+.comp-kpis .kpi-card:nth-child(2)::before {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 1), rgba(168, 85, 247, 1));
+}
+
+/* 3: Ámbar/Naranja */
+.comp-kpis .kpi-card:nth-child(3) {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(249, 115, 22, 0.14), rgba(15, 23, 42, 0.35));
+}
+
+.comp-kpis .kpi-card:nth-child(3)::before {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 1), rgba(249, 115, 22, 1));
+}
+
+/* 4: Rojo/Rosa */
+.comp-kpis .kpi-card:nth-child(4) {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(236, 72, 153, 0.14), rgba(15, 23, 42, 0.35));
+}
+
+.comp-kpis .kpi-card:nth-child(4)::before {
+  background: linear-gradient(90deg, rgba(239, 68, 68, 1), rgba(236, 72, 153, 1));
+}
+
+/* hover (sutil) */
+.comp-kpis .kpi-card:hover {
+  transform: translateY(-1px);
+  transition: transform .12s ease;
+}
+
+/* ===== KPIs comparativos: 3 tarjetas a todo el ancho ===== */
+.comp-kpis {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+
+  /* 3 columnas que ocupan todo el ancho */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* responsivo */
+@media (max-width: 1200px) {
+  .comp-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .comp-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* opcional: que se vean “más grandes” */
+.comp-kpis .kpi-card {
+  min-height: 110px;
+  /* súbelo si quieres más alto */
+  padding: 16px 16px 14px;
+}
+
+.comp-kpis .kpi-value {
+  font-size: 34px;
+  /* un poco más grande */
+}
+
+/* =========================
+   ANUAL - filtros (select + botón)
+========================= */
+.dash-filters-anual {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.dash-filters-anual .filter label {
+  display: block;
+  font-size: 12px;
+  opacity: .8;
+  margin: 0 0 6px 2px;
+}
+
+.dash-filters-anual select {
+  height: 40px;
+  min-width: 120px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .10);
+  background: rgba(255, 255, 255, .05);
+  color: #eaf2ff;
+  outline: none;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+
+.dash-filters-anual select:hover {
+  border-color: rgba(110, 168, 255, .35);
+  background: rgba(255, 255, 255, .07);
+}
+
+.dash-filters-anual select:focus {
+  border-color: rgba(110, 168, 255, .55);
+  box-shadow: 0 0 0 3px rgba(60, 130, 255, .18);
+}
+
+#btnAnualActualizar {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .10);
+  background: linear-gradient(135deg, rgba(35, 120, 255, .95), rgba(20, 70, 180, .95));
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+
+#btnAnualActualizar:hover {
+  filter: brightness(1.10);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .22);
+  transform: translateY(-1px);
+}
+
+#btnAnualActualizar:active {
+  transform: translateY(0px) scale(.99);
+}
+
+/* =========================
+   ANUAL - fila superior (donut + KPIs)
+========================= */
+.anual-top-grid {
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.anual-kpis {
+  display: grid;
+  gap: 14px;
+}
+
+.anual-kpi-card {
+  border-radius: 16px;
+  padding: 14px 14px;
+  border: 1px solid rgba(255, 255, 255, .10);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .20);
+}
+
+.anual-kpi-card .kpi-label {
+  font-size: 12px;
+  opacity: .82;
+  margin-bottom: 8px;
+}
+
+.anual-kpi-card .kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  line-height: 1.05;
+  color: #ffffff;
+}
+
+.anual-kpi-card .kpi-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: .75;
+}
+
+/* Variación de degradados (estilo Compare) */
+.anual-kpi-card.kpi-a {
+  background: linear-gradient(135deg, rgba(36, 204, 98, 0.322), rgba(15, 23, 42, .35));
+}
+
+/* verde */
+.anual-kpi-card.kpi-b {
+  background: linear-gradient(135deg, rgba(59, 130, 246, .18), rgba(15, 23, 42, .35));
+}
+
+/* azul */
+.anual-kpi-card.kpi-c {
+  background: linear-gradient(135deg, rgba(245, 159, 11, 0.267), rgba(15, 23, 42, .35));
+}
+
+/* ámbar */
+/* =========================
+   ANUAL - KPIs centrados
+========================= */
+
+.anual-kpi-card {
+  text-align: center;
+  /* centra todo el contenido */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* centra horizontalmente */
+}
+
+.anual-kpi-card .kpi-label {
+  text-align: center;
+  width: 100%;
+}
+
+.anual-kpi-card .kpi-value {
+  text-align: center;
+  width: 100%;
+}
+
+.anual-kpi-card .kpi-sub {
+  text-align: center;
+  width: 100%;
+}
+
+.anual-kpi-card .kpi-label {
+  font-size: 13px;
+  letter-spacing: .4px;
+  opacity: .85;
+}
+
+.anual-kpi-card .kpi-value {
+  font-size: 30px;
+  margin: 6px 0;
+}
+
+.anual-kpi-card .kpi-sub {
+  font-size: 12px;
+  opacity: .7;
+}
+
+.dash-card-head {
+  text-align: center;
+}
+
+/* =========================
+   ANUAL - INSUMOS (70/30)
+   ========================= */
+.filter {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+
+
+.dash-insumos .dash-card-head {
+  margin-bottom: 10px;
+}
+
+/* Split 70/30 */
+.insumos-split {
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  /* 70/30 */
+  gap: 14px;
+  align-items: stretch;
+}
+
+.insumos-left {
+  min-width: 0;
+}
+
+/* importante para Plotly */
+.insumos-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+}
+
+/* Título interno pequeño */
+.dash-card-title.sm {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* Stack KPI dentro del panel derecho */
+.anual-kpis-compact--stack {
+  padding: 0;
+  /* por si tu anual-kpis-compact mete padding raro */
+}
+
+/* KPI mini: centrado + degradado + más "vida" */
+.kpi-card--mini {
+  text-align: center;
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .25);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.kpi-card--mini:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .32);
+  border-color: rgba(255, 255, 255, .14);
+}
+
+/* Centrado de label/sub/value */
+.kpi-card--mini .kpi-label {
+  font-size: 12px;
+  opacity: .9;
+  margin-bottom: 8px;
+}
+
+.kpi-card--mini .kpi-value {
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.kpi-card--mini .kpi-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: .8;
+}
+
+/* Colores (puedes ajustar) */
+.kpi-green {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.548), rgba(16, 185, 129, 0.281));
+}
+
+.kpi-amber {
+  background: linear-gradient(135deg, rgba(255, 202, 111, 0.486), rgba(249, 115, 22, .10));
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .insumos-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dash-row1,
+.dash-row2,
+.dash-row3,
+.dash-row4,
+.dash-row5 {
+  margin-bottom: 30px;
+}
+
+.dash-row3:last-child,
+.dash-row4:last-child,
+.dash-row5:last-child {
+  margin-bottom: 0;
+}
+
+/* Panorama fila 2: tarjeta del pie más alta */
+#secPanorama #pltJeringasPie.plot {
+  height: 460px;
+  min-height: 460px;
+}
+
+/* Si la card sigue quedando justa, súbele también la card */
+#secPanorama .dash-row2 .dash-card-big {
+  min-height: 620px;
+  /* ajusta 600-680 según tu header/sub */
+}
+
+/* ============================
+   PREDICCIÓN - FILA 4 (mejor legibilidad)
+   ============================ */
+
+:root {
+  --pred-row4-h: 820px;
+  /* sube/baja: 760, 820, 900 */
+}
+
+#secPrediccion .dash-row4 {
+  align-items: stretch;
+}
+
+#secPrediccion .dash-row4 .dash-stack {
+  height: var(--pred-row4-h);
+}
+
+/* cards columna izquierda: se reparten 60/40 */
+#secPrediccion .dash-row4 .dash-stack .dash-card {
+  min-height: 0;
+  height: auto;
+  flex: 1 1 0;
+}
+
+/* PERSONAS */
+#secPrediccion .dash-row4 .dash-stack .dash-card:nth-child(1) {
+  flex: 1.2;
+}
+
+/* DOSIS BIOLÓGICOS (más grande) */
+#secPrediccion .dash-row4 .dash-stack .dash-card:nth-child(2) {
+  flex: 1.4;
+}
+
+/* card derecha: altura fija */
+#secPrediccion .dash-row4>.dash-card {
+  height: var(--pred-row4-h);
+  min-height: var(--pred-row4-h);
+  display: flex;
+  flex-direction: column;
+}
+
+/* plots: llenan espacio dentro de la card */
+#secPrediccion .dash-row4 .plot {
+  height: auto;
+  min-height: 0;
+  flex: 1 1 0;
+}
+
+/* en la derecha: 2 plots 50/50 */
+#secPrediccion .dash-row4>.dash-card .plot {
+  flex: 1 1 0;
 }

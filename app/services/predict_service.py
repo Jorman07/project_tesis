@@ -19,7 +19,7 @@ from app.services.supabase_client import supabase
 RPC_SERIES_DIARIA_OLD = "dashboard_series_diaria"
 RPC_DOSIS_VACUNA_DIA_OLD = "dashboard_dosis_por_vacuna_dia"
 
-# NEW (regla de negocio para modelos)  <<< AJUSTA AL NOMBRE REAL >>>
+# NEW (regla de negocio para modelos)
 RPC_SERIES_DIARIA_NEW = "dashboard_series_diaria_registro"
 
 
@@ -58,6 +58,32 @@ def _date_range(d1: date, d2: date) -> list[date]:
         cur += timedelta(days=1)
     return out
 
+def _add_months(d: date, k: int) -> date:
+    y = d.year + (d.month - 1 + k) // 12
+    m = (d.month - 1 + k) % 12 + 1
+    return date(y, m, 1)
+
+
+def _future_days_for_horizon(end_month: date, horizon_m: int) -> list[date]:
+    # end_month = YYYY-MM-01 (mes base)
+    # horizonte: desde mes siguiente hasta el último día del mes (horizon_m meses adelante)
+    start = _next_month_first(end_month)
+    last_month_first = _add_months(start, max(1, int(horizon_m)) - 1)
+    end = _month_end(last_month_first)
+    return _date_range(start, end)
+
+
+def _aggregate_daily_to_monthly(future_days: list[date], y_fc: list[float]) -> list[dict]:
+    if not future_days or not y_fc:
+        return []
+    by_m: dict[str, float] = {}
+    for d, v in zip(future_days, y_fc):
+        k = d.strftime("%Y-%m")
+        by_m[k] = by_m.get(k, 0.0) + float(v or 0.0)
+    out = [{"periodo": k, "total": float(round(by_m[k], 0))} for k in sorted(by_m.keys())]
+    return out
+
+
 
 # =============================================================================
 # Normalización numérica
@@ -89,7 +115,7 @@ def _num_clean(x):
 
 
 # =============================================================================
-# Insumos estimados (diario) -> SIEMPRE OLD (NO SE CRUZA CON REGLA NUEVA)
+# Insumos estimados (diario) - (NO SE CRUZA CON REGLA NUEVA)
 # =============================================================================
 def _calc_insumos_estimados_diario(start_day: date, end_day: date, vacuna: str | None = None) -> dict:
     rows = supabase.rpc(RPC_DOSIS_VACUNA_DIA_OLD, {
@@ -493,6 +519,7 @@ def _rf_forecast_next_month_daily_to_monthly(
     max_window_days: int = 365,
     min_train_days: int = 60,
     round_int_output: bool = True,
+    horizon_m: int = 1,
 ) -> ForecastResult:
     end_day = _month_end(end_month)
     eff_window = int(max(30, min(max_window_days, window_days)))
@@ -565,9 +592,14 @@ def _rf_forecast_next_month_daily_to_monthly(
             "total_days": int(len(df)),
         }
 
-    nm_first = _next_month_first(end_month)
-    nm_last = _month_end(nm_first)
-    future_days = _date_range(nm_first, nm_last)
+    ##nm_first = _next_month_first(end_month)
+    ##nm_last = _month_end(nm_first)
+    ##future_days = _date_range(nm_first, nm_last)
+
+    future_days = _future_days_for_horizon(end_month, horizon_m)
+    if not future_days:
+        nm_first = _next_month_first(end_month)
+        future_days = _date_range(nm_first, _month_end(nm_first))
 
     m_fc, name_fc = _train_regressor(is_count=True)
     use_log1p_fc = ("Poisson" not in name_fc)
@@ -580,20 +612,31 @@ def _rf_forecast_next_month_daily_to_monthly(
         use_log1p=use_log1p_fc,
     )
 
+
     if round_int_output:
         y_pred_daily = [float(int(round(v))) for v in y_pred_daily]
 
+    monthly_fc = _aggregate_daily_to_monthly(future_days, y_pred_daily)
     month_pred = float(np.sum(np.asarray(y_pred_daily, dtype=float)))
 
+
+    # next_value: el primer mes del horizonte
+    first_month_total = monthly_fc[0]["total"] if monthly_fc else float(np.sum(np.asarray(y_pred_daily, dtype=float)))
+
+    nm_first = _next_month_first(end_month)
     return ForecastResult(
         label=nm_first.strftime("%Y-%m"),
-        next_value=float(round(month_pred, 0)),
+        next_value=float(first_month_total),
         x_hist=[d.strftime("%Y-%m-%d") for d in df["fecha"]],
         y_hist=[float(v) for v in df["y"]],
         x_fc=[d.strftime("%Y-%m-%d") for d in future_days],
         y_fc=[float(v) for v in y_pred_daily],
         model=name_fc + " + recursive",
-        metrics=metrics,
+        metrics={
+            **metrics,
+            "horizon_m": int(horizon_m),
+            "monthly_fc": monthly_fc  # <-- clave para tu front (barras por mes)
+        },
     )
 
 
@@ -949,10 +992,28 @@ def _calc_recomendaciones(end_month: date, r_total: ForecastResult, r_people: Fo
     }
 
 
+
 # =============================================================================
-# Bundle principal
+# Bundle INSUMOS ESTIMADOS
 # =============================================================================
-def predict_ml_bundle(periodo: str | None, vacuna: str | None = None, window_days: int = 180) -> dict:
+
+def insumos_estimados_bundle(periodo: str, vacuna: str | None = None) -> dict:
+    end_month = _parse_ym(periodo)
+    if not end_month:
+        return {"ok": False, "error": "periodo inválido"}
+
+    mes_start = end_month
+    mes_end = _month_end(end_month)
+
+    block = _calc_insumos_estimados_diario(mes_start, mes_end, vacuna=vacuna)
+    return {"ok": True, "periodo": end_month.strftime("%Y-%m"), **block}
+
+
+# =============================================================================
+# Bundle principal PREDICCION
+# =============================================================================
+def predict_ml_bundle(periodo: str | None, vacuna: str | None = None, window_days: int = 180, horizon_m: int = 1) -> dict:
+
     end_month = _parse_ym(periodo)
     if not end_month:
         today = date.today()
@@ -966,10 +1027,10 @@ def predict_ml_bundle(periodo: str | None, vacuna: str | None = None, window_day
     start_day = end_day - timedelta(days=window_days - 1)
 
     # >>> FIX: Insumos usados diarios SOLO para el mes seleccionado <<<
-    mes_start = end_month                 # YYYY-MM-01
-    mes_end   = end_day                   # fin del mes
+    ##mes_start = end_month                 # YYYY-MM-01
+    ##mes_end   = end_day                   # fin del mes
 
-    insumos_estimados = _calc_insumos_estimados_diario(mes_start, mes_end, vacuna=vacuna)
+    ##insumos_estimados = _calc_insumos_estimados_diario(mes_start, mes_end, vacuna=vacuna)
 
 
     # -------------------------------------------------------------------------
@@ -989,6 +1050,7 @@ def predict_ml_bundle(periodo: str | None, vacuna: str | None = None, window_day
         max_window_days=365,
         min_train_days=60,
         round_int_output=True,
+        horizon_m=int(horizon_m),
     )
 
     # -------------------------------------------------------------------------
@@ -1003,6 +1065,7 @@ def predict_ml_bundle(periodo: str | None, vacuna: str | None = None, window_day
         max_window_days=365,
         min_train_days=60,
         round_int_output=True,
+        horizon_m=int(horizon_m),
     )
 
     # -------------------------------------------------------------------------
@@ -1135,10 +1198,22 @@ def predict_ml_bundle(periodo: str | None, vacuna: str | None = None, window_day
         pred_bio_top.sort(key=lambda r: r["pred_dosis"], reverse=True)
         pred_bio_top = pred_bio_top[:10]
 
+
+    future_months = []
+    try:
+        monthly_fc_doses = (r_total.metrics or {}).get("monthly_fc", []) or []
+        future_months = [m.get("periodo") for m in monthly_fc_doses if m.get("periodo")]
+    except Exception:
+        future_months = []
+
+
+
     return {
         "ok": True,
-        "next_label": _next_month_first(end_month).strftime("%Y-%m"),
-        "insumos_estimados": insumos_estimados,
+        "next_label": _next_month_first(end_month).strftime("%Y-%m"),  
+        "future_months": future_months,                               
+        "horizon_m": int(horizon_m), 
+        #"insumos_estimados": insumos_estimados,
         "jeringas_pie_title": pie_title,
 
         # >>> NO TOCAR (guantes usa esto) <<<
