@@ -1,18 +1,36 @@
 import os
 import re
+import json
+import logging
 import requests
 import unicodedata
 from datetime import date, timedelta
+from requests.exceptions import Timeout, RequestException
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
 
 
-FLASK_BOT_BASE_URL = os.getenv("FLASK_BOT_BASE_URL", "")
+FLASK_BOT_BASE_URL = os.getenv("FLASK_BOT_BASE_URL", "").rstrip("/")
 BOT_KEY = os.getenv("BOT_KEY", "")
 
-print("FLASK_BOT_BASE_URL:", FLASK_BOT_BASE_URL)
-print("BOT_KEY cargada en actions:", bool(BOT_KEY))
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+print("FLASK_BOT_BASE_URL:", FLASK_BOT_BASE_URL, flush=True)
+print("BOT_KEY cargada en actions:", bool(BOT_KEY), flush=True)
+
+# ------------------------- timeouts y sesión HTTP -------------------------
+
+# connect timeout, read timeout
+HTTP_TIMEOUT_DEFAULT = (3.05, 7)
+HTTP_TIMEOUT_SLOW = (3.05, 9)
+HTTP_TIMEOUT_MULTI = (3.05, 5)
+HTTP_TIMEOUT_FAST = (2.5, 5)
+
+_session = requests.Session()
+
+
 # ------------------------- helpers base -------------------------
 
 def _headers():
@@ -21,25 +39,25 @@ def _headers():
         h["X-BOT-KEY"] = BOT_KEY
     return h
 
+
 def _strip_accents(s: str) -> str:
     s = s or ""
     return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
 
+
 def _canon(s: str) -> str:
-    # canon para comparaciones (vacunas, categorias, etc.)
     s = _strip_accents(s or "")
     s = s.upper().strip()
     s = re.sub(r"[_\-]+", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
+
 def wants_context_reuse(text: str) -> bool:
-    # Permite reusar "last_*" solo si el usuario lo indica o si el turno es claramente follow-up
     t = (text or "").strip().lower()
     if not t:
         return False
 
-    # respuestas cortas típicas en follow-up
     if len(t.split()) <= 3:
         return True
 
@@ -48,13 +66,13 @@ def wants_context_reuse(text: str) -> bool:
         "ahora", "y en", "y para", "y el", "y la", "y los", "y las",
         "tambien", "también", "igual", "ese", "esa", "eso", "a ese", "a esa",
         "del paciente", "del mismo", "y ", "y de",
-        "ahi",
-        "ahí",
+        "ahi", "ahí",
         "mismo periodo",
         "ese periodo",
         "ese mes",
     ]
     return any(m in t for m in markers)
+
 
 def latest_entities(tracker: Tracker, entity_name: str):
     ents = tracker.latest_message.get("entities") or []
@@ -66,15 +84,73 @@ def latest_entities(tracker: Tracker, entity_name: str):
                 out.append(v)
     return out
 
+
 def latest_entity(tracker: Tracker, entity_name: str):
     vs = latest_entities(tracker, entity_name)
     return vs[0] if vs else None
 
+
+def _safe_json(response):
+    try:
+        return response.json()
+    except Exception:
+        return {}
+
+
+def _api_get(path: str, params=None, timeout=HTTP_TIMEOUT_DEFAULT):
+    """
+    Wrapper HTTP para cortar antes, capturar errores y devolver un resultado uniforme.
+    """
+    url = f"{FLASK_BOT_BASE_URL}/{path.lstrip('/')}"
+    try:
+        r = _session.get(url, params=params or {}, headers=_headers(), timeout=timeout)
+        data = _safe_json(r) if "application/json" in (r.headers.get("content-type") or "") else {}
+        return {
+            "ok": 200 <= r.status_code < 300,
+            "status": r.status_code,
+            "json": data,
+            "text": r.text[:500] if hasattr(r, "text") else "",
+            "error": None,
+        }
+    except Timeout as e:
+        logger.warning("Timeout GET %s params=%s error=%s", url, params, e)
+        return {
+            "ok": False,
+            "status": None,
+            "json": {},
+            "text": "",
+            "error": "timeout",
+        }
+    except RequestException as e:
+        logger.warning("HTTP error GET %s params=%s error=%s", url, params, e)
+        return {
+            "ok": False,
+            "status": None,
+            "json": {},
+            "text": "",
+            "error": "request",
+        }
+    except Exception as e:
+        logger.exception("Unexpected error GET %s params=%s error=%s", url, params, e)
+        return {
+            "ok": False,
+            "status": None,
+            "json": {},
+            "text": "",
+            "error": "unexpected",
+        }
+
+
+def _is_timeout(res) -> bool:
+    return res.get("error") == "timeout"
+
+
 MESES = {
-    "enero": "01","febrero":"02","marzo":"03","abril":"04","mayo":"05","junio":"06",
-    "julio":"07","agosto":"08","septiembre":"09","setiembre":"09",
-    "octubre":"10","noviembre":"11","diciembre":"12"
+    "enero": "01", "febrero": "02", "marzo": "03", "abril": "04", "mayo": "05", "junio": "06",
+    "julio": "07", "agosto": "08", "septiembre": "09", "setiembre": "09",
+    "octubre": "10", "noviembre": "11", "diciembre": "12"
 }
+
 
 def norm_month(raw: str):
     if not raw:
@@ -90,6 +166,7 @@ def norm_month(raw: str):
         return f"{m.group(2)}-{MESES[m.group(1)]}"
     return None
 
+
 def norm_date(raw: str):
     if not raw:
         return None
@@ -102,31 +179,24 @@ def norm_date(raw: str):
         return f"{yyyy}-{mm}-{dd}"
     return None
 
+
 # ------------------------- paciente campos -------------------------
 
 CAMPOS_PACIENTE_MAP = {
-    # identidad (compuestos soportados por el endpoint)
     "NOMBRE": "nombres",
     "NOMBRES": "nombres",
     "APELLIDO": "apellidos",
     "APELLIDOS": "apellidos",
-    # ubicación
     "PARROQUIA": "parroquia",
     "CANTON": "canton",
     "CANTÓN": "canton",
-
-    # datos operativos
     "CAPTACION": "captacion",
     "CAPTACIÓN": "captacion",
     "ESTABLECIMIENTO": "establecimiento",
     "EDAD": "edad",
-
-    # seguimiento
     "PROXIMA DOSIS": "proxima_dosis",
     "PRÓXIMA DOSIS": "proxima_dosis",
     "DOSIS PENDIENTE": "proxima_dosis",
-
-    # otros (si tu endpoint los permite)
     "SEXO": "sexo",
     "ULTIMA VACUNACION": "ultima_vacunacion",
     "ÚLTIMA VACUNACION": "ultima_vacunacion",
@@ -134,24 +204,22 @@ CAMPOS_PACIENTE_MAP = {
     "ÚLTIMA VACUNACIÓN": "ultima_vacunacion",
 }
 
+
 def norm_campo_paciente(raw: str):
     if not raw:
         return None
     key = _canon(raw)
-    # limpieza extra
     key = re.sub(r"[_\-]+", " ", key)
     key = re.sub(r"\s+", " ", key).strip()
-    # match directo
     if key in CAMPOS_PACIENTE_MAP:
         return CAMPOS_PACIENTE_MAP[key]
-    # match por presencia de palabra
     for k, v in CAMPOS_PACIENTE_MAP.items():
         if k in key:
             return v
     return None
 
+
 def extract_campos(tracker: Tracker):
-    # multiple campo_paciente del turno actual
     ents = latest_entities(tracker, "campo_paciente")
     out = []
     seen = set()
@@ -161,6 +229,7 @@ def extract_campos(tracker: Tracker):
             seen.add(cc)
             out.append(cc)
     return out
+
 
 # ------------------------- biologico campos -------------------------
 
@@ -181,13 +250,13 @@ def norm_campo_biologico(raw: str):
         "FRASCOS": "frascos",
         "FRASCOS POR CAJA": "frascos_por_caja",
     }
-    # match directo o por presencia
     if s in campo_map:
         return campo_map[s]
     for k, v in campo_map.items():
         if k in s:
             return v
     return None
+
 
 # ------------------------- acciones -------------------------
 
@@ -196,7 +265,6 @@ class ActionReporteMensual(Action):
         return "action_reporte_mensual"
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
-        print("[ARM] inicio")
         text = tracker.latest_message.get("text") or ""
 
         periodo_ent = latest_entity(tracker, "periodo")
@@ -204,58 +272,33 @@ class ActionReporteMensual(Action):
         if not month:
             month = norm_month(text)
 
-        print(f"[ARM] month={month}")
-
         if not month:
-            print("[ARM] sin month")
             dispatcher.utter_message("Indícame el mes como YYYY-MM o diciembre 2025.")
-            print("[ARM] fin sin month")
             return []
 
-        try:
-            print("[ARM] antes request Flask")
-            url = f"{FLASK_BOT_BASE_URL}/api/bot/reporte-mensual"
-            r = requests.get(url, params={"month": month}, headers=_headers(), timeout=8)
-            print(f"[ARM] status={r.status_code}")
-        except Exception as e:
-            print(f"[ARM] error request={e}")
-            dispatcher.utter_message("No pude consultar el reporte en este momento.")
-            print("[ARM] fin con error request")
+        res = _api_get("/api/bot/reporte-mensual", {"month": month}, timeout=HTTP_TIMEOUT_SLOW)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("La consulta del reporte tardó demasiado. Intenta nuevamente en unos segundos.")
             return []
 
-        if r.status_code != 200:
-            print(f"[ARM] body_error={r.text[:500]}")
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener el reporte mensual en este momento.")
-            print("[ARM] fin status != 200")
             return []
 
-        try:
-            print("[ARM] antes json")
-            data = (r.json() or {}).get("data") or {}
-            print("[ARM] json ok")
+        data = (res["json"].get("data") or {})
+        total = data.get("total_mensual", 0)
+        top = data.get("dosis_por_vacuna") or []
 
-            total = data.get("total_mensual", 0)
-            top = data.get("dosis_por_vacuna") or []
-            print(f"[ARM] total={total} top_len={len(top) if isinstance(top, list) else 'no-list'}")
+        lines = [f"**Resumen mensual — {month}**", "", f"• Total de dosis registradas: **{total}**"]
+        if isinstance(top, list) and top:
+            lines.append("")
+            lines.append("**Vacunas con mayor aplicación**")
+            for i, it in enumerate(top[:3], start=1):
+                lines.append(f"{i}. {it.get('vacuna','N/D')}: **{it.get('dosis_total', 0)}**")
 
-            lines = [f"**Resumen mensual — {month}**", "", f"• Total de dosis registradas: **{total}**"]
-
-            if isinstance(top, list) and top:
-                lines.append("")
-                lines.append("**Vacunas con mayor aplicación**")
-                for i, it in enumerate(top[:3], start=1):
-                    lines.append(f"{i}. {it.get('vacuna','N/D')}: **{it.get('dosis_total',0)}**")
-
-            print("[ARM] antes utter")
-            dispatcher.utter_message("\n".join(lines))
-            print("[ARM] despues utter")
-            return [SlotSet("last_periodo", month)]
-
-        except Exception as e:
-            print(f"[ARM] error post_json={e}")
-            dispatcher.utter_message("Hubo un problema al construir la respuesta.")
-            print("[ARM] fin con error post_json")
-            return []
+        dispatcher.utter_message("\n".join(lines))
+        return [SlotSet("last_periodo", month)]
 
 
 class ActionPacienteHistorial(Action):
@@ -267,7 +310,6 @@ class ActionPacienteHistorial(Action):
         ced_ent = latest_entity(tracker, "cedula")
         cedula = (ced_ent or tracker.get_slot("cedula") or "").strip()
         if not cedula:
-            # último recurso: regex
             m = re.search(r"\b\d{10}\b", text)
             cedula = m.group(0) if m else ""
 
@@ -275,28 +317,33 @@ class ActionPacienteHistorial(Action):
             dispatcher.utter_message("Indícame la **cédula**. Ej: “historial 0967894387”.")
             return []
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/historial-paciente"
-        r = requests.get(url, params={"cedula": cedula}, headers=_headers(), timeout=20)
-        if r.status_code == 404:
+        res = _api_get("/api/bot/historial-paciente", {"cedula": cedula}, timeout=HTTP_TIMEOUT_SLOW)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("El historial tardó demasiado en responder. Intenta nuevamente.")
+            return []
+
+        if res["status"] == 404:
             dispatcher.utter_message("No se encontraron registros para esa cédula.")
             return []
-        if r.status_code != 200:
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener el historial en este momento.")
             return []
 
-        j = r.json() or {}
+        j = res["json"] or {}
         p = j.get("paciente") or {"cedula": cedula, "nombres": "N/D", "edad": "N/D", "grupo_riesgo": "N/D"}
         rows = j.get("rows") or []
 
         lines = [
             "**Paciente encontrado**",
-            f"• Cédula: **{p.get('cedula','N/D')}**",
-            f"• Nombres: **{p.get('nombres','N/D')}**",
-            f"• Sexo: **{p.get('sexo','N/D')}**",
-            f"• Edad: **{p.get('edad','N/D')}**",
-            f"• Grupo de riesgo: **{p.get('grupo_riesgo','N/D')}**",
-            f"• Parroquia: **{p.get('parroquia','N/D')}**",
-            f"• Establecimiento: **{p.get('establecimiento','N/D')}**",
+            f"• Cédula: **{p.get('cedula', 'N/D')}**",
+            f"• Nombres: **{p.get('nombres', 'N/D')}**",
+            f"• Sexo: **{p.get('sexo', 'N/D')}**",
+            f"• Edad: **{p.get('edad', 'N/D')}**",
+            f"• Grupo de riesgo: **{p.get('grupo_riesgo', 'N/D')}**",
+            f"• Parroquia: **{p.get('parroquia', 'N/D')}**",
+            f"• Establecimiento: **{p.get('establecimiento', 'N/D')}**",
             "",
             "**Historial (más reciente)**"
         ]
@@ -308,8 +355,8 @@ class ActionPacienteHistorial(Action):
             raw = row.get("vacuna_raw")
             raw_txt = f" (raw: {raw})" if raw and raw != vac else ""
             lines.append(
-                f"{i}. {fecha} — {vac}{raw_txt} | Dosis: {row.get('dosis','N/D')} | "
-                f"Esquema: {row.get('esquema','N/D')} | Estado: {row.get('estado_registro','N/D')}"
+                f"{i}. {fecha} — {vac}{raw_txt} | Dosis: {row.get('dosis', 'N/D')} | "
+                f"Esquema: {row.get('esquema', 'N/D')} | Estado: {row.get('estado_registro', 'N/D')}"
             )
 
         dispatcher.utter_message("\n".join(lines))
@@ -323,7 +370,6 @@ class ActionPacienteDato(Action):
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
         text = tracker.latest_message.get("text") or ""
 
-        # cedula: entidad del turno > slot > last_cedula (solo si follow-up)
         ced_ent = latest_entity(tracker, "cedula")
         cedula = (ced_ent or tracker.get_slot("cedula") or "").strip()
 
@@ -334,7 +380,6 @@ class ActionPacienteDato(Action):
             dispatcher.utter_message("Indícame la **cédula**. Ej: “parroquia del paciente 0967894387”.")
             return []
 
-        # campo: entidad del turno > parse del texto > slot
         campo_ent = latest_entity(tracker, "campo_paciente")
         campo = norm_campo_paciente(campo_ent) if campo_ent else None
         if not campo:
@@ -347,14 +392,18 @@ class ActionPacienteDato(Action):
             )
             return []
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/paciente-dato"
-        r = requests.get(url, params={"cedula": cedula, "dato": campo}, headers=_headers(), timeout=20)
-        j = r.json() if r.headers.get("content-type","").startswith("application/json") else {}
+        res = _api_get("/api/bot/paciente-dato", {"cedula": cedula, "dato": campo}, timeout=HTTP_TIMEOUT_DEFAULT)
+        j = res["json"]
 
-        if r.status_code == 404:
+        if _is_timeout(res):
+            dispatcher.utter_message("Ese dato tardó demasiado en responder. Intenta nuevamente.")
+            return []
+
+        if res["status"] == 404:
             dispatcher.utter_message("No se encontraron registros para esa cédula.")
             return []
-        if r.status_code != 200:
+
+        if not res["ok"]:
             if j.get("error") == "Dato no permitido":
                 dispatcher.utter_message("Dato no permitido. Prueba con: parroquia, cantón, edad, captación, establecimiento, próxima dosis.")
                 return []
@@ -375,7 +424,6 @@ class ActionPacienteDato(Action):
             "apellidos": "Apellidos",
             "sexo": "Sexo",
             "ultima_vacunacion": "Última vacunación",
-
         }
         campo_label = labels.get(campo, campo)
 
@@ -399,7 +447,6 @@ class ActionContarVacunaDia(Action):
         vac_ent = latest_entity(tracker, "vacuna")
         vacuna = (vac_ent or "").strip()
         if not vacuna:
-            # no reusar vacuna vieja aquí
             dispatcher.utter_message("Ejemplo: “cuántos se vacunaron con Influenza el 2025-12-10”.")
             return []
 
@@ -412,12 +459,17 @@ class ActionContarVacunaDia(Action):
             dispatcher.utter_message("Ejemplo: “cuántos se vacunaron con Influenza el 2025-12-10”.")
             return []
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/contar-vacuna-dia"
-        r = requests.get(url, params={"vacuna": vacuna, "fecha": fecha}, headers=_headers(), timeout=20)
-        if r.status_code != 200:
+        res = _api_get("/api/bot/contar-vacuna-dia", {"vacuna": vacuna, "fecha": fecha}, timeout=HTTP_TIMEOUT_DEFAULT)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("La consulta tardó demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude contar en este momento.")
             return []
-        total = (r.json() or {}).get("total", 0)
+
+        total = (res["json"] or {}).get("total", 0)
 
         dispatcher.utter_message(
             f"**Conteo de vacunación — {fecha}**\n• Vacuna: **{vacuna}**\n• Total de registros: **{total}**"
@@ -432,7 +484,6 @@ class ActionContarVacunaMes(Action):
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
         text = tracker.latest_message.get("text") or ""
 
-        # periodo: entidad/texto del turno. no reusar slot viejo sin continuidad.
         per_ent = latest_entity(tracker, "periodo")
         month = norm_month(per_ent) if per_ent else None
         if not month:
@@ -440,11 +491,9 @@ class ActionContarVacunaMes(Action):
         if not month and wants_context_reuse(text):
             month = norm_month(tracker.get_slot("last_periodo") or "")
 
-        # vacuna: entidad del turno o parse simple; no reusar slot viejo salvo continuidad.
         vac_ent = latest_entity(tracker, "vacuna")
         vacuna_in = (vac_ent or "").strip()
         if not vacuna_in:
-            # parse simple por texto (HB, HB adulto, etc.)
             m = re.search(r"(?:dosis\s+de|vacunados\s+con|vacuna\s+)\s+([A-Za-zÁÉÍÓÚÑáéíóúñ0-9\s]+?)\s+(?:en|del)\s+", text, flags=re.IGNORECASE)
             vacuna_in = (m.group(1).strip() if m else "")
 
@@ -458,7 +507,6 @@ class ActionContarVacunaMes(Action):
             )
             return []
 
-        # Normalizaciones mínimas de alias
         alias = {
             "HB": "HEPATITIS B",
             "HEPATITISB": "HEPATITIS B",
@@ -470,39 +518,37 @@ class ActionContarVacunaMes(Action):
         if vcanon in alias:
             vacuna_in = alias[vcanon]
 
-        # Traer reporte mensual desde Flask
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/reporte-mensual"
-        r = requests.get(url, params={"month": month}, headers=_headers(), timeout=20)
-        if r.status_code != 200:
+        res = _api_get("/api/bot/reporte-mensual", {"month": month}, timeout=HTTP_TIMEOUT_SLOW)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("El reporte mensual tardó demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener el reporte mensual en este momento.")
             return []
 
-        data = (r.json() or {}).get("data") or {}
+        data = (res["json"].get("data") or {})
         total_mes = int(data.get("total_mensual", 0) or 0)
         lista = data.get("dosis_por_vacuna") or []
 
         if not isinstance(lista, list) or not lista:
             dispatcher.utter_message(f"No hay datos de dosis por vacuna para **{month}**.")
             return []
-        
-        txt = _canon(text)
 
-        # Desambiguación influenza
+        txt = _canon(text)
         vin = _canon(vacuna_in)
         if "INFLUENZA" in vin:
             if "PEDIATR" in vin or "PEDIATR" in txt or "NIÑ" in txt or "INFANT" in txt:
                 vacuna_in = "INFLUENZA PEDIATRICA"
             elif "ADUL" in vin or "ADUL" in txt:
                 vacuna_in = "INFLUENZA ADULTO"
-            # si queda solo "INFLUENZA", NO lo fuerces aquí
-
 
         target = _canon(vacuna_in)
 
         def matches(vrow: str) -> bool:
             v = _canon(vrow)
 
-            # evita cruces: pediatrica ≠ adulto
             if "INFLUENZA" in target:
                 if "PEDIATR" in target and "ADUL" in v:
                     return False
@@ -512,16 +558,13 @@ class ActionContarVacunaMes(Action):
             if v == target:
                 return True
 
-            # substring match SOLO si target no es demasiado genérico
             if len(target) >= 6 and (target in v or v in target):
                 return True
 
-            # HB vs HB ADULTO vs HEPATITIS B
             if target in ("HB", "HEPATITIS B") and ("HB" in v or "HEPATITIS B" in v):
                 return True
 
             return False
-
 
         found = None
         for it in lista:
@@ -531,7 +574,7 @@ class ActionContarVacunaMes(Action):
                 break
 
         if not found:
-            sugerencias = [ (it.get("vacuna") or "N/D") for it in lista[:8] ]
+            sugerencias = [(it.get("vacuna") or "N/D") for it in lista[:8]]
             dispatcher.utter_message(
                 "No encontré esa vacuna exactamente en el reporte mensual.\n"
                 "Prueba con uno de estos nombres:\n• " + "\n• ".join(sugerencias)
@@ -549,10 +592,11 @@ class ActionContarVacunaMes(Action):
         pct = (dosis / total_mes * 100.0) if total_mes > 0 else 0.0
         vacuna_out = found.get("vacuna") or vacuna_in
 
-        lines = []
-        lines.append(f"**Conteo mensual — {month}**")
-        lines.append(f"• Vacuna: **{vacuna_out}**")
-        lines.append(f"• Dosis aplicadas en el mes: **{dosis}**")
+        lines = [
+            f"**Conteo mensual — {month}**",
+            f"• Vacuna: **{vacuna_out}**",
+            f"• Dosis aplicadas en el mes: **{dosis}**",
+        ]
         if rank is not None:
             lines.append(f"• Ranking del mes: **#{rank}**")
         lines.append(f"• Porcentaje del total mensual: **{pct:.1f}%**")
@@ -597,22 +641,24 @@ class ActionTopVacunaPeriodo(Action):
         if not month:
             month = norm_month(text)
 
-        # REUSO DE CONTEXTO (faltaba)
         if not month and wants_context_reuse(text):
             month = norm_month(tracker.get_slot("last_periodo") or "")
 
         if not month:
-            
             dispatcher.utter_message("Indícame el periodo. Ej: “octubre 2025” o “2025-10”.")
             return []
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/reporte-mensual"
-        r = requests.get(url, params={"month": month}, headers=_headers(), timeout=20)
-        if r.status_code != 200:
+        res = _api_get("/api/bot/reporte-mensual", {"month": month}, timeout=HTTP_TIMEOUT_SLOW)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("La consulta del top de vacunas tardó demasiado.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener el top de vacunas en este momento.")
             return []
 
-        data = (r.json() or {}).get("data") or {}
+        data = (res["json"].get("data") or {})
         lista = data.get("dosis_por_vacuna") or []
         if not lista:
             dispatcher.utter_message(f"No hay datos de dosis por vacuna para **{month}**.")
@@ -621,11 +667,10 @@ class ActionTopVacunaPeriodo(Action):
         top1 = lista[0]
         dispatcher.utter_message(
             f"**Vacuna con más dosis — {month}**\n"
-            f"• Vacuna: **{top1.get('vacuna','N/D')}**\n"
-            f"• Dosis: **{int(top1.get('dosis_total',0) or 0)}**"
+            f"• Vacuna: **{top1.get('vacuna', 'N/D')}**\n"
+            f"• Dosis: **{int(top1.get('dosis_total', 0) or 0)}**"
         )
         return [SlotSet("last_periodo", month)]
-
 
 
 class ActionPacienteInfoPersonal(Action):
@@ -643,26 +688,31 @@ class ActionPacienteInfoPersonal(Action):
             dispatcher.utter_message("Indícame la **cédula** del paciente.")
             return []
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/historial-paciente"
-        r = requests.get(url, params={"cedula": cedula}, headers=_headers(), timeout=20)
-        if r.status_code == 404:
+        res = _api_get("/api/bot/historial-paciente", {"cedula": cedula}, timeout=HTTP_TIMEOUT_SLOW)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("La información del paciente tardó demasiado en responder.")
+            return []
+
+        if res["status"] == 404:
             dispatcher.utter_message("No se encontraron registros para esa cédula.")
             return []
-        if r.status_code != 200:
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener la información del paciente en este momento.")
             return []
 
-        j = r.json() or {}
+        j = res["json"] or {}
         p = j.get("paciente") or {}
         dispatcher.utter_message(
             "**Información del paciente**\n"
             f"• Cédula: **{p.get('cedula', cedula)}**\n"
-            f"• Nombres: **{p.get('nombres','N/D')}**\n"
-            f"• Sexo: **{p.get('sexo','N/D')}**\n"
-            f"• Edad: **{p.get('edad','N/D')}**\n"
-            f"• Grupo de riesgo: **{p.get('grupo_riesgo','N/D')}**\n"
-            f"• Parroquia: **{p.get('parroquia','N/D')}**\n"
-            f"• Establecimiento: **{p.get('establecimiento','N/D')}**"
+            f"• Nombres: **{p.get('nombres', 'N/D')}**\n"
+            f"• Sexo: **{p.get('sexo', 'N/D')}**\n"
+            f"• Edad: **{p.get('edad', 'N/D')}**\n"
+            f"• Grupo de riesgo: **{p.get('grupo_riesgo', 'N/D')}**\n"
+            f"• Parroquia: **{p.get('parroquia', 'N/D')}**\n"
+            f"• Establecimiento: **{p.get('establecimiento', 'N/D')}**"
         )
         return [SlotSet("last_cedula", cedula), SlotSet("cedula", cedula)]
 
@@ -697,16 +747,27 @@ class ActionPacienteDatoMultiple(Action):
         }
 
         resultados = []
+        hubo_timeout = False
+
         for campo in campos:
-            url = f"{FLASK_BOT_BASE_URL}/api/bot/paciente-dato"
-            r = requests.get(url, params={"cedula": cedula, "dato": campo}, headers=_headers(), timeout=20)
-            j = r.json() if r.headers.get("content-type","").startswith("application/json") else {}
-            valor = j.get("valor") if r.status_code == 200 else None
+            res = _api_get("/api/bot/paciente-dato", {"cedula": cedula, "dato": campo}, timeout=HTTP_TIMEOUT_MULTI)
+            if _is_timeout(res):
+                hubo_timeout = True
+                resultados.append((labels.get(campo, campo), "N/D"))
+                continue
+
+            j = res["json"]
+            valor = j.get("valor") if res["ok"] else None
             resultados.append((labels.get(campo, campo), valor if valor not in [None, ""] else "N/D"))
 
         lines = [f"**Datos del paciente — {cedula}**"]
         for k, v in resultados:
             lines.append(f"• {k}: **{v}**")
+
+        if hubo_timeout:
+            lines.append("")
+            lines.append("_Algunos campos tardaron demasiado en responder._")
+
         dispatcher.utter_message("\n".join(lines))
         return [SlotSet("last_cedula", cedula), SlotSet("cedula", cedula)]
 
@@ -718,7 +779,6 @@ class ActionConteoCaptacionPeriodo(Action):
     def run(self, dispatcher, tracker, domain):
         text = tracker.latest_message.get("text") or ""
 
-        # -------- periodo --------
         per_ent = latest_entity(tracker, "periodo")
         month = norm_month(per_ent) if per_ent else None
         if not month:
@@ -726,14 +786,10 @@ class ActionConteoCaptacionPeriodo(Action):
         if not month and wants_context_reuse(text):
             month = norm_month(tracker.get_slot("last_periodo") or "")
 
-        # -------- captación / esquema --------
         capt_ent = latest_entity(tracker, "captacion")
-        capt_raw = (capt_ent or "").strip().lower()
-        capt_raw = capt_raw.replace("tardía", "tardia")
+        capt_raw = (capt_ent or "").strip().lower().replace("tardía", "tardia")
 
         low = text.lower()
-
-        # detectar por texto libre
         if not capt_raw:
             if "camp" in low:
                 capt_raw = "campania"
@@ -742,7 +798,6 @@ class ActionConteoCaptacionPeriodo(Action):
             elif "tardi" in low:
                 capt_raw = "tardia"
 
-        # normalización final
         if "camp" in capt_raw:
             capt = "campania"
         elif capt_raw in ("temprana", "tardia"):
@@ -759,22 +814,18 @@ class ActionConteoCaptacionPeriodo(Action):
             )
             return []
 
-        # -------- llamada API --------
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/conteo-captacion-periodo"
-        r = requests.get(
-            url,
-            params={"month": month, "captacion": capt},
-            headers=_headers(),
-            timeout=20
-        )
+        res = _api_get("/api/bot/conteo-captacion-periodo", {"month": month, "captacion": capt}, timeout=HTTP_TIMEOUT_DEFAULT)
 
-        if r.status_code != 200:
+        if _is_timeout(res):
+            dispatcher.utter_message("El conteo tardó demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener el conteo en este momento.")
             return []
 
-        total = int((r.json() or {}).get("total", 0) or 0)
+        total = int((res["json"] or {}).get("total", 0) or 0)
 
-        # -------- respuesta diferenciada --------
         if capt == "campania":
             dispatcher.utter_message(
                 f"**Conteo por esquema — {month}**\n"
@@ -792,7 +843,6 @@ class ActionConteoCaptacionPeriodo(Action):
         return [SlotSet("last_periodo", month)]
 
 
-
 class ActionConteoTotalDia(Action):
     def name(self) -> str:
         return "action_conteo_total_dia"
@@ -808,13 +858,17 @@ class ActionConteoTotalDia(Action):
             dispatcher.utter_message("Indícame la fecha. Ej: “17/09/2025”.")
             return []
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/conteo-total-dia"
-        r = requests.get(url, params={"fecha": fecha}, headers=_headers(), timeout=20)
-        if r.status_code != 200:
+        res = _api_get("/api/bot/conteo-total-dia", {"fecha": fecha}, timeout=HTTP_TIMEOUT_DEFAULT)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("El total del día tardó demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener el total del día en este momento.")
             return []
 
-        total = (r.json() or {}).get("total", 0)
+        total = (res["json"] or {}).get("total", 0)
         dispatcher.utter_message(f"**Vacunados del día — {fecha}**\n• Total de registros: **{total}**")
         return []
 
@@ -835,13 +889,17 @@ class ActionTopMesAnio(Action):
             dispatcher.utter_message("Indícame el año. Ej: “¿qué mes tuvo más dosis en 2025?”")
             return []
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/top-mes-anio"
-        r = requests.get(url, params={"anio": anio}, headers=_headers(), timeout=20)
-        if r.status_code != 200:
+        res = _api_get("/api/bot/top-mes-anio", {"anio": anio}, timeout=HTTP_TIMEOUT_DEFAULT)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("La consulta del año tardó demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener el mes con más dosis en este momento.")
             return []
 
-        j = r.json() or {}
+        j = res["json"] or {}
         month = j.get("month")
         total = j.get("total", 0)
 
@@ -902,15 +960,22 @@ class ActionInsumoCategorias(Action):
         return "action_insumo_categorias"
 
     def run(self, dispatcher, tracker, domain):
-        r = requests.get(f"{FLASK_BOT_BASE_URL}/api/bot/insumo/categorias", headers=_headers(), timeout=20)
-        if r.status_code != 200:
+        res = _api_get("/api/bot/insumo/categorias", timeout=HTTP_TIMEOUT_DEFAULT)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("Las categorías tardaron demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener las categorías en este momento.")
             return []
-        rows = r.json().get("data") or []
+
+        rows = (res["json"].get("data") or [])
         cats = [x.get("categoria") for x in rows if x.get("categoria")]
         if not cats:
             dispatcher.utter_message("No hay categorías disponibles.")
             return []
+
         dispatcher.utter_message("**Categorías de insumos**\n• " + "\n• ".join(cats))
         return []
 
@@ -934,60 +999,45 @@ class ActionInsumoStockTipo(Action):
         cat_ent = latest_entity(tracker, "insumo_categoria")
         tipo_ent = latest_entity(tracker, "insumo_tipo")
 
-        # canonización
         cat = _canon(cat_ent) if cat_ent else ""
         tipo = (tipo_ent or "").strip()
 
-        # detectar categoría por texto aunque NLU no haya sacado entidad
         if not cat:
             cat = detect_insumo_categoria_from_text(text) or ""
 
-        # slots previos
         last_cat = _canon(tracker.get_slot("last_insumo_categoria") or "")
         last_tipo = (tracker.get_slot("last_insumo_tipo") or "").strip()
 
-        # si NO hay categoría aún, recién ahí reutiliza contexto (si aplica)
         if not cat and wants_context_reuse(text):
             cat = last_cat
 
-        # --- detectar tipo desde texto (ml o calibres) aunque NLU no lo haya sacado ---
         if not tipo:
             m_ml = re.search(r"\b(\d{2,4})\s*ml\b", text_l)
             if m_ml:
                 tipo = f"{m_ml.group(1)}ml"
 
-        # --- REGLA CLAVE: solo reusar last_tipo si la categoría es la misma ---
         if not tipo and wants_context_reuse(text):
             if cat and last_cat and cat == last_cat:
                 tipo = last_tipo
-            # si cambió la categoría, NO reusar tipo (se evita ALGODON + 23G)
 
-        # llamar endpoint
-        r = requests.get(
-            f"{FLASK_BOT_BASE_URL}/api/bot/insumo/tipos",
-            params={"categoria": cat or "", "q": tipo or ""},
-            headers=_headers(),
-            timeout=20
-        )
+        res = _api_get("/api/bot/insumo/tipos", {"categoria": cat or "", "q": tipo or ""}, timeout=HTTP_TIMEOUT_DEFAULT)
 
-        if r.status_code != 200:
+        if _is_timeout(res):
+            dispatcher.utter_message("La consulta de stock tardó demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener el stock de insumos en este momento.")
             return []
 
-        rows = (r.json() or {}).get("data") or []
+        rows = (res["json"].get("data") or [])
         if not rows:
-            # si pediste un tipo (o heredado) y no hay resultados, suelta el tipo y lista por categoría
             if cat:
-                r2 = requests.get(
-                    f"{FLASK_BOT_BASE_URL}/api/bot/insumo/tipos",
-                    params={"categoria": cat, "q": ""},
-                    headers=_headers(),
-                    timeout=20
-                )
-                rows2 = (r2.json() or {}).get("data") or []
+                res2 = _api_get("/api/bot/insumo/tipos", {"categoria": cat, "q": ""}, timeout=HTTP_TIMEOUT_MULTI)
+                rows2 = (res2["json"].get("data") or []) if res2["ok"] else []
                 if rows2:
                     tops = rows2[:6]
-                    lista = "\n".join([f"• {x.get('nombre_tipo','N/D')}" for x in tops])
+                    lista = "\n".join([f"• {x.get('nombre_tipo', 'N/D')}" for x in tops])
                     dispatcher.utter_message(
                         f"Tengo varios tipos para **{cat}**. Indica cuál necesitas:\n{lista}"
                     )
@@ -995,16 +1045,12 @@ class ActionInsumoStockTipo(Action):
             dispatcher.utter_message("No encontré resultados con esos datos. Prueba indicando categoría y/o el tipo exacto.")
             return []
 
-        # --- si NO hay tipo explícito y la categoría CAMBIÓ, no adivines: lista opciones ---
         if not tipo and cat and last_cat and cat != last_cat:
             tops = rows[:6]
-            lista = "\n".join([f"• {x.get('nombre_tipo','N/D')}" for x in tops])
-            dispatcher.utter_message(
-                f"Para **{cat}** necesito el tipo. Opciones:\n{lista}"
-            )
+            lista = "\n".join([f"• {x.get('nombre_tipo', 'N/D')}" for x in tops])
+            dispatcher.utter_message(f"Para **{cat}** necesito el tipo. Opciones:\n{lista}")
             return [SlotSet("last_insumo_categoria", cat), SlotSet("last_insumo_tipo", None)]
 
-        # priorizar match exacto cuando sí hay tipo
         top = rows[0]
         if tipo:
             tipo_norm = tipo.strip().lower()
@@ -1017,18 +1063,16 @@ class ActionInsumoStockTipo(Action):
 
         dispatcher.utter_message(
             f"**Stock de insumo**\n"
-            f"• Categoría: **{top.get('categoria','N/D')}**\n"
-            f"• Tipo: **{top.get('nombre_tipo','N/D')}**\n"
-            f"• Packs: **{top.get('total_packs',0)}**\n"
-            f"• Unidades: **{top.get('total_unidades',0)}**"
+            f"• Categoría: **{top.get('categoria', 'N/D')}**\n"
+            f"• Tipo: **{top.get('nombre_tipo', 'N/D')}**\n"
+            f"• Packs: **{top.get('total_packs', 0)}**\n"
+            f"• Unidades: **{top.get('total_unidades', 0)}**"
         )
 
         return [
             SlotSet("last_insumo_categoria", top.get("categoria")),
             SlotSet("last_insumo_tipo", top.get("nombre_tipo")),
         ]
-
-
 
 
 class ActionInsumoLotesTipo(Action):
@@ -1055,16 +1099,17 @@ class ActionInsumoLotesTipo(Action):
             dispatcher.utter_message("Indícame el tipo o la categoría. Ej: “lotes de 23G x 1\" 0.5ml”.")
             return []
 
-        r = requests.get(
-            f"{FLASK_BOT_BASE_URL}/api/bot/insumo/lotes",
-            params={"categoria": cat or "", "tipo": tipo or ""},
-            headers=_headers(), timeout=20
-        )
-        if r.status_code != 200:
+        res = _api_get("/api/bot/insumo/lotes", {"categoria": cat or "", "tipo": tipo or ""}, timeout=HTTP_TIMEOUT_DEFAULT)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("La consulta de lotes tardó demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener los lotes en este momento.")
             return []
 
-        rows = r.json().get("data") or []
+        rows = res["json"].get("data") or []
         if not rows:
             dispatcher.utter_message("No se encontraron lotes para ese insumo.")
             return []
@@ -1072,8 +1117,8 @@ class ActionInsumoLotesTipo(Action):
         lines = ["**Lotes del insumo**"]
         for it in rows[:10]:
             lines.append(
-                f"• Lote: **{it.get('lote','N/D')}** | Packs: {it.get('packs','N/D')} | Unidades: {it.get('unidades','N/D')} | "
-                f"Fab: {it.get('fecha_fabricacion','N/D')} | Cad: {it.get('fecha_caducidad','N/D')} | Estado: {it.get('estado','N/D')}"
+                f"• Lote: **{it.get('lote', 'N/D')}** | Packs: {it.get('packs', 'N/D')} | Unidades: {it.get('unidades', 'N/D')} | "
+                f"Fab: {it.get('fecha_fabricacion', 'N/D')} | Cad: {it.get('fecha_caducidad', 'N/D')} | Estado: {it.get('estado', 'N/D')}"
             )
         dispatcher.utter_message("\n".join(lines))
         return []
@@ -1099,23 +1144,28 @@ class ActionInsumoPorCaducar(Action):
             dispatcher.utter_message("Indícame en cuántos días. Ej: “insumos por caducar en 30 días”.")
             return []
 
-        r = requests.get(
-            f"{FLASK_BOT_BASE_URL}/api/bot/insumo/tipos",
-            params={"categoria": cat or "", "exp_days": int(float(exp)), "excluir_caducados": "false"},
-            headers=_headers(), timeout=20
+        res = _api_get(
+            "/api/bot/insumo/tipos",
+            {"categoria": cat or "", "exp_days": int(float(exp)), "excluir_caducados": "false"},
+            timeout=HTTP_TIMEOUT_DEFAULT
         )
-        if r.status_code != 200:
+
+        if _is_timeout(res):
+            dispatcher.utter_message("La consulta de caducidad tardó demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude consultar caducidad en este momento.")
             return []
 
-        rows = r.json().get("data") or []
+        rows = res["json"].get("data") or []
         if not rows:
             dispatcher.utter_message("No encontré insumos por caducar en ese rango.")
             return []
 
         lines = [f"**Insumos por caducar en {int(float(exp))} días**"]
         for it in rows[:10]:
-            lines.append(f"• {it.get('nombre_tipo','N/D')} | Packs: {it.get('total_packs',0)} | Unidades: {it.get('total_unidades',0)}")
+            lines.append(f"• {it.get('nombre_tipo', 'N/D')} | Packs: {it.get('total_packs', 0)} | Unidades: {it.get('total_unidades', 0)}")
         dispatcher.utter_message("\n".join(lines))
         return [SlotSet("last_insumo_categoria", cat or None)]
 
@@ -1136,16 +1186,17 @@ class ActionInsumoBiologicosAsociados(Action):
             dispatcher.utter_message("Indícame el tipo de insumo. Ej: “biológicos asociados a 23G x 1\" 0.5ml”.")
             return []
 
-        r = requests.get(
-            f"{FLASK_BOT_BASE_URL}/api/bot/insumo/biologicos-asociados",
-            params={"tipo": tipo},
-            headers=_headers(), timeout=20
-        )
-        if r.status_code != 200:
+        res = _api_get("/api/bot/insumo/biologicos-asociados", {"tipo": tipo}, timeout=HTTP_TIMEOUT_DEFAULT)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("La consulta de biológicos asociados tardó demasiado.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener los biológicos asociados en este momento.")
             return []
 
-        rows = r.json().get("data") or []
+        rows = res["json"].get("data") or []
         if not rows:
             dispatcher.utter_message("No encontré biológicos asociados a ese tipo.")
             return []
@@ -1153,8 +1204,8 @@ class ActionInsumoBiologicosAsociados(Action):
         lines = [f"**Biológicos asociados — {tipo}**"]
         for b in rows[:10]:
             lines.append(
-                f"• **{b.get('nombre_biologico','N/D')}** | Vía: {b.get('via','N/D')} | Ángulo: {b.get('angulo','N/D')} | "
-                f"Dosis/frasco: {b.get('dosis_por_frasco','N/D')} | Dosis admin.: {b.get('dosis_administrada','N/D')}"
+                f"• **{b.get('nombre_biologico', 'N/D')}** | Vía: {b.get('via', 'N/D')} | Ángulo: {b.get('angulo', 'N/D')} | "
+                f"Dosis/frasco: {b.get('dosis_por_frasco', 'N/D')} | Dosis admin.: {b.get('dosis_administrada', 'N/D')}"
             )
         dispatcher.utter_message("\n".join(lines))
         return []
@@ -1170,7 +1221,6 @@ class ActionBiologicoDetalle(Action):
         bio_ent = latest_entity(tracker, "biologico")
         bio = (bio_ent or "").strip()
 
-        # follow-up: reusar last_biologico solo si tiene sentido
         if not bio and wants_context_reuse(text):
             bio = (tracker.get_slot("last_biologico") or "").strip()
 
@@ -1183,28 +1233,31 @@ class ActionBiologicoDetalle(Action):
             dispatcher.utter_message("Indícame el nombre del biológico. Ej: “vía de HEXAVALENTE”.")
             return []
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/biologico/detalle"
-        r = requests.get(url, params={"nombre": bio}, headers=_headers(), timeout=20)
+        res = _api_get("/api/bot/biologico/detalle", {"nombre": bio}, timeout=HTTP_TIMEOUT_DEFAULT)
 
-        if r.status_code == 404:
+        if _is_timeout(res):
+            dispatcher.utter_message("El detalle del biológico tardó demasiado en responder.")
+            return []
+
+        if res["status"] == 404:
             dispatcher.utter_message("No encontré ese biológico en el sistema (o está inactivo).")
             return []
-        if r.status_code != 200:
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude obtener el detalle del biológico en este momento.")
             return []
 
-        data = (r.json() or {}).get("data") or {}
+        data = (res["json"].get("data") or {})
         nombre = data.get("nombre_biologico", bio)
 
-        # si no pidió campo específico
         if not campo:
             lines = [
                 f"**Biológico — {nombre}**",
-                f"• Vía: **{data.get('via','N/D')}** | Ángulo: **{data.get('angulo','N/D')}**",
-                f"• Dosis/frasco: **{data.get('dosis_por_frasco','N/D')}** | Dosis admin.: **{data.get('dosis_administrada','N/D')}**",
-                f"• Lote: **{data.get('lote','N/D')}** | Caducidad: **{data.get('fecha_caducidad','N/D')}**",
-                f"• Cajas: **{data.get('cajas','N/D')}** | Frascos: **{data.get('frascos','N/D')}** | Frascos/caja: **{data.get('frascos_por_caja','N/D')}**",
-                f"• Descripción: {data.get('descripcion','N/D')}",
+                f"• Vía: **{data.get('via', 'N/D')}** | Ángulo: **{data.get('angulo', 'N/D')}**",
+                f"• Dosis/frasco: **{data.get('dosis_por_frasco', 'N/D')}** | Dosis admin.: **{data.get('dosis_administrada', 'N/D')}**",
+                f"• Lote: **{data.get('lote', 'N/D')}** | Caducidad: **{data.get('fecha_caducidad', 'N/D')}**",
+                f"• Cajas: **{data.get('cajas', 'N/D')}** | Frascos: **{data.get('frascos', 'N/D')}** | Frascos/caja: **{data.get('frascos_por_caja', 'N/D')}**",
+                f"• Descripción: {data.get('descripcion', 'N/D')}",
             ]
             dispatcher.utter_message("\n".join(lines))
             return [SlotSet("last_biologico", nombre)]
@@ -1232,14 +1285,17 @@ class ActionPacientesProximaDosisHoy(Action):
             ack = "De acuerdo."
             tail = "¿Te muestro más pacientes o prefieres filtrar por biológico?"
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/pacientes/proxima-dosis-hoy"
-        r = requests.get(url, params={"limit": 80}, headers=_headers(), timeout=20)
+        res = _api_get("/api/bot/pacientes/proxima-dosis-hoy", {"limit": 80}, timeout=HTTP_TIMEOUT_SLOW)
 
-        if r.status_code != 200:
+        if _is_timeout(res):
+            dispatcher.utter_message("La agenda de próximas dosis tardó demasiado en responder.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude consultar la agenda de próximas dosis en este momento.")
             return []
 
-        rows = (r.json() or {}).get("data") or []
+        rows = (res["json"].get("data") or [])
         if not rows:
             dispatcher.utter_message(f"{ack} Hoy no hay pacientes registrados con **próxima dosis** programada.")
             return []
@@ -1275,7 +1331,6 @@ class ActionTryVacunacionQuery(Action):
         text = (tracker.latest_message.get("text") or "").strip()
         low = text.lower()
 
-        # SOLO turno actual (slots viejos solo con continuidad)
         periodo = norm_month(latest_entity(tracker, "periodo") or "") or norm_month(text)
         fecha = norm_date(latest_entity(tracker, "fecha") or "") or norm_date(text)
 
@@ -1294,14 +1349,12 @@ class ActionTryVacunacionQuery(Action):
             m = re.search(r"\b(19|20)\d{2}\b", text)
             anio = int(m.group(0)) if m else None
 
-        # continuidad: si el mensaje lo sugiere
         if wants_context_reuse(text):
             if not periodo:
                 periodo = norm_month(tracker.get_slot("last_periodo") or "")
             if not vacuna:
                 vacuna = (tracker.get_slot("last_vacuna") or "").strip()
 
-        # captación
         capt_ent = latest_entity(tracker, "captacion")
         capt = (capt_ent or "").strip().lower().replace("tardía", "tardia")
         if not capt:
@@ -1310,13 +1363,11 @@ class ActionTryVacunacionQuery(Action):
             elif "tardi" in low:
                 capt = "tardia"
 
-        # top N
         limit = 10
         mtop = re.search(r"\btop\s*(\d{1,2})\b", low)
         if mtop:
             limit = max(1, min(50, int(mtop.group(1))))
 
-        # decidir qtype
         qtype = None
         if (("próxima dosis" in low) or ("proxima dosis" in low) or ("pendientes" in low)) and ("hoy" in low):
             qtype = "proxima_dosis_hoy"
@@ -1348,7 +1399,6 @@ class ActionTryVacunacionQuery(Action):
             )
             return []
 
-        # validar mínimos
         if qtype in ("total_mes", "top_vacunas_mes", "captacion_mes") and not periodo:
             dispatcher.utter_message(response="utter_pedir_periodo")
             return []
@@ -1376,21 +1426,19 @@ class ActionTryVacunacionQuery(Action):
         if qtype == "top_vacunas_mes":
             params["limit"] = str(limit)
 
-        url = f"{FLASK_BOT_BASE_URL}/api/bot/vacunacion/query"
-        try:
-            r = requests.get(url, params=params, headers=_headers(), timeout=20)
-        except Exception:
+        res = _api_get("/api/bot/vacunacion/query", params, timeout=HTTP_TIMEOUT_SLOW)
+
+        if _is_timeout(res):
+            dispatcher.utter_message("No pude consultar en este momento porque la respuesta tardó demasiado.")
+            return []
+
+        if not res["ok"]:
             dispatcher.utter_message("No pude consultar en este momento.")
             return []
 
-        if r.status_code != 200:
-            dispatcher.utter_message("No pude consultar en este momento.")
-            return []
-
-        j = r.json() or {}
+        j = res["json"] or {}
         data = j.get("data")
 
-        # formateo
         if qtype in ("total_dia", "total_mes", "vacuna_dia", "vacuna_mes"):
             total = int((data or {}).get("total", 0) or 0)
 
@@ -1418,7 +1466,7 @@ class ActionTryVacunacionQuery(Action):
 
             lines = [f"**Top vacunas — {periodo}**"]
             for i, it in enumerate(items[:limit], start=1):
-                lines.append(f"{i}. {it.get('vacuna','N/D')}: **{it.get('total',0)}**")
+                lines.append(f"{i}. {it.get('vacuna', 'N/D')}: **{it.get('total', 0)}**")
             dispatcher.utter_message("\n".join(lines))
             return [SlotSet("last_periodo", periodo)]
 
@@ -1431,7 +1479,7 @@ class ActionTryVacunacionQuery(Action):
             lines = [f"**Captación — {periodo}**"]
             for it in items[:10]:
                 cap_name = it.get("captacion") or "N/D"
-                lines.append(f"• {cap_name}: **{it.get('total',0)}**")
+                lines.append(f"• {cap_name}: **{it.get('total', 0)}**")
             dispatcher.utter_message("\n".join(lines))
             return [SlotSet("last_periodo", periodo)]
 
@@ -1442,7 +1490,7 @@ class ActionTryVacunacionQuery(Action):
             dispatcher.utter_message(
                 f"**Mes con más dosis — {anio}**\n"
                 f"• Mes: **{data.get('month')}**\n"
-                f"• Total de dosis: **{data.get('total',0)}**"
+                f"• Total de dosis: **{data.get('total', 0)}**"
             )
             return []
 
