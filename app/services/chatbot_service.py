@@ -34,11 +34,34 @@ class ChatbotService:
     @staticmethod
     def ask_rasa(message: str, session_id: str) -> str:
         payload = {"sender": session_id, "message": message}
-        r = requests.post(f"{RASA_URL}/webhooks/rest/webhook", json=payload, timeout=20)
-        r.raise_for_status()
-        data = r.json()
-        parts = [m.get("text") for m in data if m.get("text")]
-        return "\n".join(parts).strip() if parts else ""
+        url = f"{RASA_URL}/webhooks/rest/webhook"
+
+        t0 = time.time()
+        try:
+            r = requests.post(url, json=payload, timeout=(3.05, 45))
+            dt = round(time.time() - t0, 3)
+
+            print("ASK_RASA status:", r.status_code, "time:", dt, "seg", flush=True)
+
+            r.raise_for_status()
+
+            data = r.json()
+            print("ASK_RASA raw:", data, flush=True)
+
+            if not isinstance(data, list):
+                print("ASK_RASA unexpected payload type", type(data), flush=True)
+                return ""
+
+            parts = [m.get("text") for m in data if isinstance(m, dict) and m.get("text")]
+            reply = "\n".join(parts).strip()
+
+            print("ASK_RASA reply:", reply if reply else "<EMPTY>", flush=True)
+            return reply
+
+        except Exception as e:
+            dt = round(time.time() - t0, 3)
+            print("ASK_RASA ERROR:", str(e), "time:", dt, "seg", flush=True)
+            raise
 
     @staticmethod
     def start_conversation(id_usuario: int, metadata: dict | None = None) -> int:

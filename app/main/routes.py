@@ -1732,7 +1732,8 @@ def api_chat():
             source="rasa",
             error={"warning": "empty_reply"}
         )
-        return jsonify({"reply": "", "engine": "fallback"}), 200
+        #return jsonify({"reply": "", "engine": "fallback"}), 200
+        return jsonify({"reply": "Rasa respondió vacío.", "engine": "fallback"}), 200
 
     except Exception as e:
         # 6) Rasa caído -> fallback front (log del error)
@@ -1744,7 +1745,8 @@ def api_chat():
             source="rasa",
             error={"error": "rasa_down_or_error", "detail": str(e)}
         )
-        return jsonify({"reply": "", "engine": "fallback"}), 200
+        #return jsonify({"reply": "", "engine": "fallback"}), 200
+        return jsonify({"reply": f"Error consultando Rasa: {str(e)}", "engine": "fallback"}), 200
 
 
 
