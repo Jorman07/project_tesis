@@ -1669,6 +1669,7 @@ def api_consulta_rapida_registros():
 #==========================
 ###CHATBOT PRASS
 #=========================
+import time
 
 @main_bp.post("/api/chat")
 @login_required
@@ -1754,7 +1755,19 @@ def bot_reporte_mensual():
     if not month:
         return jsonify({"error": "Falta month"}), 400
     try:
+        ##rep = supabase.rpc("reporte_mensual_agregado", {"p_month": month}).execute().data
+        t0 = time.time()
+
+        t_rpc0 = time.time()
         rep = supabase.rpc("reporte_mensual_agregado", {"p_month": month}).execute().data
+        t_rpc1 = time.time()
+
+        print("RPC reporte_mensual:", round(t_rpc1 - t_rpc0, 3), "seg")
+
+        t1 = time.time()
+        print("TOTAL endpoint reporte_mensual:", round(t1 - t0, 3), "seg")
+
+
         rep0 = rep[0] if isinstance(rep, list) and rep else rep
         if isinstance(rep0, dict) and len(rep0.keys()) == 1:
             rep0 = list(rep0.values())[0]
@@ -1772,7 +1785,19 @@ def bot_historial_paciente():
         return jsonify({"error": "Falta cedula"}), 400
 
     try:
+        #rows = supabase.rpc("historial_paciente", {"p_cedula": cedula}).execute().data or []
+        t0 = time.time()
+
+        t_rpc0 = time.time()
         rows = supabase.rpc("historial_paciente", {"p_cedula": cedula}).execute().data or []
+        t_rpc1 = time.time()
+
+        print("RPC historial_paciente:", round(t_rpc1 - t_rpc0, 3), "seg")
+
+        t1 = time.time()
+        print("TOTAL endpoint historial_paciente:", round(t1 - t0, 3), "seg")
+
+
         if not rows:
             return jsonify({"rows": []}), 404
 
@@ -1795,6 +1820,11 @@ def bot_contar_vacuna_dia():
 
     try:
         yyyy, mm, dd = fecha.split("-")
+        
+
+        t0 = time.time()
+
+        t_rpc0 = time.time()
         r = supabase.rpc("count_registros", {
             "p_year": yyyy,
             "p_month": mm,
@@ -1809,6 +1839,12 @@ def bot_contar_vacuna_dia():
             "p_edad_min": None,
             "p_edad_max": None
         }).execute().data
+        t_rpc1 = time.time()
+
+        print("RPC count_registros:", round(t_rpc1 - t_rpc0, 3), "seg")
+
+        t1 = time.time()
+        print("TOTAL endpoint contar_vacuna_dia:", round(t1 - t0, 3), "seg")
         total = r[0]["total"] if r else 0
         return jsonify({"total": total})
     except Exception:
@@ -1827,7 +1863,17 @@ def bot_paciente_dato():
     dato = dato_normalizado(dato_raw)
 
     try:
+        #rows = supabase.rpc("historial_paciente", {"p_cedula": cedula}).execute().data or []
+        t0 = time.time()
+
+        t_rpc0 = time.time()
         rows = supabase.rpc("historial_paciente", {"p_cedula": cedula}).execute().data or []
+        t_rpc1 = time.time()
+
+        print("RPC historial_paciente:", round(t_rpc1 - t_rpc0, 3), "seg")
+
+        t1 = time.time()
+        print("TOTAL endpoint paciente_dato:", round(t1 - t0, 3), "seg")
     except Exception:
         rows = []
 
