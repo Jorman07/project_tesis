@@ -22,12 +22,11 @@ print("BOT_KEY cargada en actions:", bool(BOT_KEY), flush=True)
 
 # ------------------------- timeouts y sesión HTTP -------------------------
 
-# connect timeout, read timeout
-HTTP_TIMEOUT_DEFAULT = (3.05, 7)
-HTTP_TIMEOUT_SLOW = (3.05, 9)
-HTTP_TIMEOUT_MULTI = (3.05, 5)
-HTTP_TIMEOUT_FAST = (2.5, 5)
-
+# connect timeout , read timeout
+HTTP_TIMEOUT_FAST = (3.05, 8)       # consultas simples
+HTTP_TIMEOUT_DEFAULT = (3.05, 12)   # consultas normales
+HTTP_TIMEOUT_MULTI = (3.05, 10)     # cuando hay varias consultas seguidas
+HTTP_TIMEOUT_SLOW = (3.05, 20)      # reportes pesados (RPC / agregaciones)
 _session = requests.Session()
 
 
